@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title th:text="'Booking ' + ${booking.bookingCode} + ' - Admin'">Booking Details</title>
+    <style>
+        @media print {
+            .no-print, .admin-sidebar, .admin-topbar, footer, .btn, .breadcrumb {
+                display: none !important;
+            }
+            .admin-main-wrapper {
+                margin-left: 0 !important;
+            }
+            .admin-card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="page-title">Booking Details</div>
+
+<div layout:fragment="content">
+    <!-- Header / Top Bar -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2 no-print">
+                <i class="bi bi-arrow-left me-1"></i> Back to Bookings
+            </a>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <h3 class="fw-bold text-dark mb-0 font-monospace" th:text="${booking.bookingCode}">
+                    #SB-20261022-00001
+                </h3>
+                <span th:if="${booking.status.name() == 'PENDING'}" class="badge-status badge-status-pending fs-6">Pending Review</span>
+                <span th:if="${booking.status.name() == 'DEPOSIT_PAID'}" class="badge-status badge-status-deposit fs-6">Deposit Paid</span>
+                <span th:if="${booking.status.name() == 'PAID'}" class="badge-status badge-status-paid fs-6">Paid & Confirmed</span>
+                <span th:if="${booking.status.name() == 'COMPLETED'}" class="badge-status badge-status-completed fs-6">Completed</span>
+                <span th:if="${booking.status.name() == 'CANCELLED'}" class="badge-status badge-status-cancelled fs-6">Cancelled</span>
+                <span th:if="${booking.status.name() == 'EXPIRED'}" class="badge-status badge-status-inactive fs-6">Expired</span>
+
+                <span th:if="${booking.source.name() == 'WALK_IN'}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                    <i class="bi bi-shop me-1"></i>Walk-in
+                </span>
+                <span th:if="${booking.source.name() == 'ONLINE'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                    <i class="bi bi-globe me-1"></i>Online Web
+                </span>
+            </div>
+            <p class="text-muted small mt-1 mb-0">
+                Created on <span th:text="${#temporals.format(booking.createdAt, 'dd MMMM yyyy, HH:mm')}">Date</span>
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 no-print">
+            <button type="button" class="btn btn-outline-secondary rounded-pill px-3" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Print Receipt
+            </button>
+            <a th:href="@{'/admin/bookings/' + ${booking.id} + '/edit'}" class="btn btn-primary rounded-pill px-3 shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i> Edit Booking
+            </a>
+            <button type="button" class="btn btn-outline-danger rounded-pill px-3"
+                    th:data-booking-id="${booking.id}"
+                    th:data-booking-code="${booking.bookingCode}"
+                    onclick="openDeleteModal(this)">
+                <i class="bi bi-trash me-1"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Details -->
+        <div class="col-lg-7">
+            <!-- Facility & Reservation Schedule Card -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-calendar-event text-primary"></i>
+                        <span>Facility & Reserved Schedule</span>
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Facility Pitch:</span>
+                            <h5 class="fw-bold text-dark mb-1" th:text="${booking.field.name}">Field A</h5>
+                            <span class="badge bg-light text-primary border" th:text="${booking.field.category.name}">Football</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Date of Play:</span>
+                            <h5 class="fw-bold text-dark mb-1" th:text="${#temporals.format(booking.bookingDate, 'EEEE, dd MMMM yyyy')}">Date</h5>
+                            <span class="text-muted small">
+                                <i class="bi bi-clock me-1"></i>
+                                <span th:text="${#temporals.format(booking.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.endTime, 'HH:mm')}">08:00 - 10:00</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <h6 class="text-muted small fw-bold text-uppercase mb-2">Booked Slot Intervals:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div th:each="slot : ${booking.slots}" class="p-2 px-3 bg-light border rounded-3 font-monospace d-flex align-items-center gap-2">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            <span class="fw-semibold text-dark" th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">08:00 - 09:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer & Account Information -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-person-circle text-primary"></i>
+                        <span>Customer Information</span>
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Customer Full Name:</span>
+                            <div class="fw-bold fs-6 text-dark" th:text="${booking.customerName}">Sokha Chan</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <span class="text-muted small d-block">Phone Contact:</span>
+                            <div class="fw-bold fs-6">
+                                <a th:href="'tel:' + ${booking.customerPhone}" class="text-primary text-decoration-none">
+                                    <i class="bi bi-telephone-fill me-1"></i>
+                                    <span th:text="${booking.customerPhone}">+85512345678</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-12 pt-3 border-top">
+                            <span class="text-muted small d-block mb-2">Registered System Account:</span>
+                            <div th:if="${booking.user != null}" class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 border">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px;">
+                                    <i class="bi bi-person-fill fs-5"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark" th:text="${booking.user.name}">User Name</div>
+                                    <small class="text-muted" th:text="${booking.user.email}">user@email.com</small>
+                                </div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle ms-auto">
+                                    Verified Member
+                                </span>
+                            </div>
+                            <div th:unless="${booking.user != null}" class="p-3 bg-light rounded-3 border text-muted small">
+                                <i class="bi bi-person-x me-1"></i> Walk-in guest reservation (no linked registered account).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Financials, Quick Status & Payments -->
+        <div class="col-lg-5">
+            <!-- Payment & Financial Card -->
+            <div class="admin-card mb-4">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-credit-card-2-front text-primary"></i>
+                        <span>Payment & Financial Summary</span>
+                    </h5>
+                </div>
+                <div class="admin-card-body">
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Total Booking Price:</span>
+                            <strong class="text-dark fs-5" th:text="'$' + ${#numbers.formatDecimal(booking.totalPrice, 1, 'COMMA', 2, 'POINT')}">$0.00</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Paid Amount:</span>
+                            <strong class="text-success fs-5" th:text="'$' + ${#numbers.formatDecimal(booking.paidAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</strong>
+                        </div>
+                        <div class="d-flex justify-content-between pt-2 border-top">
+                            <span class="fw-bold text-muted">Remaining Balance:</span>
+                            <strong th:class="${remainingBalance.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'text-danger fs-5' : 'text-success fs-5'"
+                                    th:text="'$' + ${#numbers.formatDecimal(remainingBalance, 1, 'COMMA', 2, 'POINT')}">$0.00</strong>
+                        </div>
+                    </div>
+
+                    <!-- Quick Status Change Actions -->
+                    <div class="no-print">
+                        <h6 class="text-muted small fw-bold text-uppercase mb-2">Quick Status Transitions:</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <!-- If not paid yet -->
+                            <form th:if="${booking.status.name() != 'PAID' and booking.status.name() != 'COMPLETED' and booking.status.name() != 'CANCELLED'}"
+                                  th:action="@{'/admin/bookings/' + ${booking.id} + '/status'}" method="post">
+                                <input type="hidden" name="status" value="PAID">
+                                <input type="hidden" name="paymentMethod" value="CASH">
+                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3">
+                                    <i class="bi bi-check2-circle me-1"></i> Mark as Paid (Cash)
+                                </button>
+                            </form>
+
+                            <!-- If paid, mark completed -->
+                            <form th:if="${booking.status.name() == 'PAID'}"
+                                  th:action="@{'/admin/bookings/' + ${booking.id} + '/status'}" method="post">
+                                <input type="hidden" name="status" value="COMPLETED">
+                                <button type="submit" class="btn btn-sm btn-info text-white rounded-pill px-3">
+                                    <i class="bi bi-flag-fill me-1"></i> Mark as Completed
+                                </button>
+                            </form>
+
+                            <!-- Cancel booking -->
+                            <form th:if="${booking.status.name() != 'CANCELLED'}"
+                                  th:action="@{'/admin/bookings/' + ${booking.id} + '/status'}" method="post">
+                                <input type="hidden" name="status" value="CANCELLED">
+                                <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-3"
+                                        onclick="return confirm('Are you sure you want to cancel this booking? Reserved slots will be freed.')">
+                                    <i class="bi bi-x-circle me-1"></i> Cancel Booking
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Transactions Table -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-receipt-cutoff text-success"></i>
+                        <span>Payment Records</span>
+                    </h5>
+                    <span class="badge bg-light text-dark border" th:text="${payments.size()} + ' record(s)'">0</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0 small">
+                        <thead>
+                            <tr>
+                                <th>Ref</th>
+                                <th>Method</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${payments.isEmpty()}">
+                                <td colspan="5" class="text-center py-3 text-muted">
+                                    No payment transactions recorded yet.
+                                </td>
+                            </tr>
+                            <tr th:each="p : ${payments}">
+                                <td class="font-monospace fw-semibold" th:text="${p.transactionRef}">TXN-001</td>
+                                <td>
+                                    <span th:if="${p.method.name() == 'KHQR'}" class="badge bg-primary-subtle text-primary border">KHQR</span>
+                                    <span th:if="${p.method.name() == 'CASH'}" class="badge bg-success-subtle text-success border">Cash</span>
+                                </td>
+                                <td class="fw-bold" th:text="'$' + ${p.amount}">$0.00</td>
+                                <td>
+                                    <span th:if="${p.status.name() == 'SUCCESS'}" class="badge bg-success">Success</span>
+                                    <span th:if="${p.status.name() == 'PENDING'}" class="badge bg-warning text-dark">Pending</span>
+                                    <span th:if="${p.status.name() == 'FAILED'}" class="badge bg-danger">Failed</span>
+                                </td>
+                                <td th:text="${p.paidAt != null ? #temporals.format(p.paidAt, 'dd/MM/yyyy HH:mm') : (p.createdAt != null ? #temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm') : '-')}">Date</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Booking
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="deleteBookingForm" method="post" action="">
+                    <div class="modal-body py-4">
+                        <p class="mb-2">Are you sure you want to permanently delete booking <strong id="deleteBookingCodeText" class="text-dark font-monospace">#SB-000</strong>?</p>
+                        <div class="alert alert-warning small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            This will permanently remove the booking record, payment transactions, and free up its pitch slots.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">
+                            <i class="bi bi-trash me-1"></i>Delete Permanently
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+    function openDeleteModal(btn) {
+        const bookingId = btn.getAttribute('data-booking-id');
+        const bookingCode = btn.getAttribute('data-booking-code');
+
+        document.getElementById('deleteBookingCodeText').innerText = '#' + bookingCode;
+        document.getElementById('deleteBookingForm').action = '/admin/bookings/' + bookingId + '/delete';
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+    }
+</script>
+</th:block>
+</body>
+</html>

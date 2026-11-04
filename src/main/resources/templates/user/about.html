@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title>About Us - SportZone Arena Phnom Penh</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Hero Header Banner -->
+    <div class="p-4 p-md-5 rounded-4 mb-5 text-white position-relative overflow-hidden shadow-sm"
+         style="background: linear-gradient(135deg, #0b7285 0%, #084c5a 100%);">
+        <div class="position-relative" style="z-index: 2;">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-white-50 text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">About Us</li>
+                </ol>
+            </nav>
+            <div class="d-inline-flex align-items-center bg-white bg-opacity-20 rounded-pill px-3 py-1 mb-3 small">
+                <i class="bi bi-geo-alt-fill text-warning me-1"></i>Phnom Penh, Kingdom of Cambodia
+            </div>
+            <h1 class="fw-bold mb-3 display-5">Empowering Cambodia's Sports Community</h1>
+            <p class="text-white-50 mb-0 lead fs-6" style="max-width: 680px;">
+                SportZone Arena is Phnom Penh's premier sports facility management and booking network, connecting athletes, corporate leagues, and friends with tournament-grade pitches and courts.
+            </p>
+        </div>
+        <div class="position-absolute end-0 bottom-0 opacity-10 pe-5 pb-3 d-none d-lg-block" style="font-size: 11rem; line-height: 1;">
+            <i class="bi bi-shield-shaded"></i>
+        </div>
+    </div>
+
+    <!-- Stats Counter Bar -->
+    <div class="row row-cols-2 row-cols-lg-4 g-3 mb-5 text-center">
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="text-primary fs-1 fw-bold mb-1" th:text="${totalFields} + '+'">14+</div>
+                <h6 class="fw-semibold text-dark mb-0">Verified Sports Venues</h6>
+                <small class="text-muted">Across Phnom Penh</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="text-success fs-1 fw-bold mb-1" th:text="${totalCategories}">6</div>
+                <h6 class="fw-semibold text-dark mb-0">Sport Categories</h6>
+                <small class="text-muted">Football, Futsal, Tennis & More</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="text-info fs-1 fw-bold mb-1">25,000+</div>
+                <h6 class="fw-semibold text-dark mb-0">Matches Hosted</h6>
+                <small class="text-muted">Since 2024 Launch</small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="text-warning fs-1 fw-bold mb-1">100%</div>
+                <h6 class="fw-semibold text-dark mb-0">Bakong KHQR</h6>
+                <small class="text-muted">Instant Slot Confirmation</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Our Story & Mission Section -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 mb-5 bg-white">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold mb-2">Our Mission</span>
+                <h2 class="fw-bold text-dark mb-3">Say Goodbye to Phone Call Hassles & Double Bookings</h2>
+                <p class="text-secondary leading-relaxed mb-3">
+                    Born in the heart of Phnom Penh, SportZone Arena was established by a passionate group of Cambodian athletes and technologists. For years, organizing friendly football matches or badminton sessions required endless phone calls, uncertain availability, and manual cash handovers.
+                </p>
+                <p class="text-secondary leading-relaxed mb-4">
+                    We built SportZone Arena to give Cambodian sports enthusiasts the modern experience they deserve: transparent real-time calendars, automated peak and off-peak rates, and instant digital payments powered by the National Bank of Cambodia's <strong>Bakong KHQR</strong> standard.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill text-success fs-4 me-2"></i>
+                        <span class="fw-medium text-dark">Real-Time Calendars</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill text-success fs-4 me-2"></i>
+                        <span class="fw-medium text-dark">Zero Double-Booking Guarantee</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill text-success fs-4 me-2"></i>
+                        <span class="fw-medium text-dark">All Major Cambodian Banks</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="position-relative d-inline-block">
+                    <img th:src="@{/img/hero-sports-action.jpg}"
+                         class="img-fluid rounded-4 shadow"
+                         alt="SportZone Phnom Penh Arena"
+                         style="max-height: 380px; object-fit: cover;">
+                    <div class="position-absolute bottom-0 start-0 m-3 p-3 bg-dark bg-opacity-80 backdrop-blur rounded-3 text-white text-start shadow">
+                        <small class="text-warning fw-bold d-block"><i class="bi bi-patch-check-fill me-1"></i>Official Headquarters</small>
+                        <span class="small">Khan Sen Sok, Phnom Penh, Cambodia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phnom Penh Venues Locations -->
+    <div class="mb-5">
+        <div class="text-center mb-4">
+            <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2 fw-semibold mb-2">Our Network</span>
+            <h2 class="fw-bold text-dark">Premier Phnom Penh Campuses</h2>
+            <p class="text-muted">Conveniently located venues equipped with professional amenities across the capital.</p>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+                <div class="card sport-card h-100 border-0 shadow-sm p-4 bg-white">
+                    <div class="rounded-3 bg-primary-subtle text-primary p-3 d-inline-flex mb-3" style="width: 50px; height: 50px; align-items: center; justify-content: center;">
+                        <i class="bi bi-trophy-fill fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">Sen Sok Mega Complex</h5>
+                    <span class="text-muted small mb-3 d-block"><i class="bi bi-geo-alt text-danger me-1"></i>St. 1986, Sangkat Phnom Penh Thmey</span>
+                    <p class="text-secondary small flex-grow-1">
+                        Our flagship multi-pitch hub featuring three 7-a-side and full 11-a-side synthetic turf football fields, covered futsal courts, and spectator stands.
+                    </p>
+                    <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                        <span class="badge bg-light text-secondary border">Football • Futsal</span>
+                        <a th:href="@{/fields}" class="btn btn-outline-primary btn-sm rounded-pill">View Pitches</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card sport-card h-100 border-0 shadow-sm p-4 bg-white">
+                    <div class="rounded-3 bg-success-subtle text-success p-3 d-inline-flex mb-3" style="width: 50px; height: 50px; align-items: center; justify-content: center;">
+                        <i class="bi bi-snow fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">BKK Elite Rackets Club</h5>
+                    <span class="text-muted small mb-3 d-block"><i class="bi bi-geo-alt text-danger me-1"></i>St. 57, Sangkat Boeung Keng Kang 1</span>
+                    <p class="text-secondary small flex-grow-1">
+                        Fully air-conditioned tournament-grade badminton courts with Taraflex flooring and outdoor acrylic hardcourt tennis with professional nighttime floodlighting.
+                    </p>
+                    <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                        <span class="badge bg-light text-secondary border">Badminton • Tennis</span>
+                        <a th:href="@{/fields}" class="btn btn-outline-primary btn-sm rounded-pill">View Courts</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card sport-card h-100 border-0 shadow-sm p-4 bg-white">
+                    <div class="rounded-3 bg-warning-subtle text-warning-emphasis p-3 d-inline-flex mb-3" style="width: 50px; height: 50px; align-items: center; justify-content: center;">
+                        <i class="bi bi-water fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">Riverside Arena & Beach</h5>
+                    <span class="text-muted small mb-3 d-block"><i class="bi bi-geo-alt text-danger me-1"></i>National Road 5, Sangkat Chroy Changvar</span>
+                    <p class="text-secondary small flex-grow-1">
+                        Indoor hardwood basketball arena with electronic scoreboards alongside deep-sand beach volleyball courts with refreshing riverside breezes.
+                    </p>
+                    <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                        <span class="badge bg-light text-secondary border">Basketball • Volleyball</span>
+                        <a th:href="@{/fields}" class="btn btn-outline-primary btn-sm rounded-pill">View Courts</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ready to Play CTA Banner -->
+    <div class="card border-0 rounded-4 shadow-sm text-center p-5 text-white position-relative overflow-hidden mb-5"
+         style="background: linear-gradient(135deg, #0b7285 0%, #12b886 100%);">
+        <h2 class="fw-bold mb-3">Ready for Your Next Match in Phnom Penh?</h2>
+        <p class="text-white-50 lead fs-6 mb-4" style="max-width: 550px; margin: 0 auto;">
+            Choose from 14 verified venues, pick your preferred hour, and secure your field with Bakong KHQR in under 60 seconds.
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a th:href="@{/fields}" class="btn btn-warning btn-lg px-4 fw-bold rounded-pill shadow-sm">
+                <i class="bi bi-search me-1"></i>Find a Field
+            </a>
+            <a th:href="@{/contact}" class="btn btn-outline-light btn-lg px-4 rounded-pill">
+                <i class="bi bi-envelope me-1"></i>Contact Team
+            </a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

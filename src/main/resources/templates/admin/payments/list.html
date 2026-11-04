@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Payments & KHQR Transactions</title>
+</head>
+<body>
+<div layout:fragment="page-title">Payments & KHQR</div>
+
+<div layout:fragment="content">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Payments & Bakong KHQR</h3>
+            <p class="text-muted mb-0">Audit transaction hashes, payment statuses, and settlement logs.</p>
+        </div>
+    </div>
+
+    <!-- Payments Table Card -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title">
+                <i class="bi bi-credit-card-2-front-fill text-warning"></i>
+                <span>Payment Transactions</span>
+            </h5>
+            <span class="badge bg-light text-dark border" th:text="${paymentsPage.totalElements} + ' total records'">0 records</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Booking Code</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Transaction Ref</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${paymentsPage.content.isEmpty()}">
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-cash-stack fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <h6 class="fw-bold">No payment transactions found</h6>
+                        </td>
+                    </tr>
+                    <tr th:each="payment : ${paymentsPage.content}">
+                        <td class="font-monospace text-muted" th:text="'#' + ${payment.id}">#1</td>
+                        <td>
+                            <strong class="font-monospace text-dark" th:text="${payment.booking.bookingCode}">#SPB-001</strong>
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-dark" th:text="${payment.booking.customerName}">Customer</span>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-success" th:text="'$' + ${payment.amount}">$0.00</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" th:text="${payment.method}">KHQR</span>
+                        </td>
+                        <td>
+                            <small class="font-monospace text-muted text-truncate d-inline-block" style="max-width: 180px;" th:text="${payment.transactionRef != null ? payment.transactionRef : '-'}">-</small>
+                        </td>
+                        <td>
+                            <span th:if="${payment.status.name() == 'PAID' or payment.status.name() == 'SUCCESS'}" class="badge-status badge-status-paid">Paid</span>
+                            <span th:if="${payment.status.name() == 'PENDING'}" class="badge-status badge-status-pending">Pending</span>
+                            <span th:if="${payment.status.name() == 'FAILED'}" class="badge-status badge-status-cancelled">Failed</span>
+                        </td>
+                        <td>
+                            <small class="text-muted" th:text="${#temporals.format(payment.createdAt, 'yyyy-MM-dd HH:mm')}">2026-10-22</small>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title>My Bookings - SportZone Arena</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header Banner -->
+    <div class="p-4 p-md-5 rounded-4 mb-4 text-white position-relative overflow-hidden shadow-sm"
+         style="background: linear-gradient(135deg, #0b7285 0%, #084c5a 100%);">
+        <div class="position-relative" style="z-index: 2;">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-white-50 text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">My Bookings</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold mb-2 display-6">My Bookings & Reservations</h1>
+            <p class="text-white-50 mb-0 lead fs-6">
+                Track your active field reservations, check KHQR payment status, and download match receipts.
+            </p>
+        </div>
+    </div>
+
+    <!-- Filter Tabs Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <ul class="nav nav-pills bg-white p-2 rounded-4 shadow-sm border">
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4"
+                   th:classappend="${currentStatusFilter == null or currentStatusFilter == '' ? 'active' : ''}"
+                   th:href="@{/my-bookings}">
+                    <i class="bi bi-list-ul me-1"></i>All Bookings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4"
+                   th:classappend="${currentStatusFilter == 'upcoming' ? 'active' : ''}"
+                   th:href="@{/my-bookings(status='upcoming')}">
+                    <i class="bi bi-calendar-event me-1"></i>Upcoming
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4"
+                   th:classappend="${currentStatusFilter == 'history' ? 'active' : ''}"
+                   th:href="@{/my-bookings(status='history')}">
+                    <i class="bi bi-clock-history me-1"></i>Past / Cancelled
+                </a>
+            </li>
+        </ul>
+
+        <a th:href="@{/fields}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i>Book New Field
+        </a>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${bookingsPage.content.isEmpty()}" class="text-center py-5 bg-white rounded-4 shadow-sm my-4">
+        <div class="display-1 text-muted opacity-50 mb-3"><i class="bi bi-calendar-x"></i></div>
+        <h4 class="fw-bold text-dark">No bookings found</h4>
+        <p class="text-muted">You haven't made any bookings in this section yet.</p>
+        <a th:href="@{/fields}" class="btn btn-primary rounded-pill px-4 mt-2">
+            <i class="bi bi-search me-1"></i>Browse Available Fields
+        </a>
+    </div>
+
+    <!-- Bookings Cards List -->
+    <div th:unless="${bookingsPage.content.isEmpty()}" class="row row-cols-1 g-3 mb-5">
+        <div class="col" th:each="booking : ${bookingsPage.content}">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white transition hover-shadow">
+                <div class="row align-items-center g-3">
+                    <!-- Field Visual / Icon -->
+                    <div class="col-md-2 col-sm-3 text-center">
+                        <div class="rounded-3 overflow-hidden position-relative bg-light border mx-auto" style="width: 100px; height: 80px;">
+                            <img th:if="${booking.field.mainImagePath != null}"
+                                 th:src="@{${booking.field.mainImagePath}}"
+                                 class="w-100 h-100 object-fit-cover"
+                                 alt="Field">
+                            <div th:unless="${booking.field.mainImagePath != null}"
+                                 class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                <i class="bi bi-trophy"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking Info -->
+                    <div class="col-md-6 col-sm-9">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-light text-secondary border font-monospace" th:text="${booking.bookingCode}">CODE</span>
+                            <span class="badge bg-info-subtle text-info-emphasis rounded-pill" th:text="${booking.field.category.name}">Category</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1" th:text="${booking.field.name}">Field Name</h5>
+                        <div class="text-muted small">
+                            <i class="bi bi-calendar3 text-primary me-1"></i>
+                            <span th:text="${#temporals.format(booking.bookingDate, 'EEE, dd MMM yyyy')}">Date</span>
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-clock text-primary me-1"></i>
+                            <span th:text="${#temporals.format(booking.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.endTime, 'HH:mm')}">Time</span>
+                        </div>
+                    </div>
+
+                    <!-- Pricing & Status -->
+                    <div class="col-md-2 col-sm-6 text-md-center">
+                        <span class="badge rounded-pill px-3 py-2 fw-semibold d-inline-block mb-1"
+                              th:classappend="${booking.status.name() == 'PAID' or booking.status.name() == 'COMPLETED'} ? 'bg-success text-white' : (${booking.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 'bg-secondary text-white')"
+                              th:text="${booking.status.name()}">STATUS</span>
+                        <div class="fw-bold text-primary fs-5" th:text="'$' + ${booking.totalPrice}">$0.00</div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="col-md-2 col-sm-6 text-end d-flex flex-column gap-2 justify-content-center">
+                        <a th:href="@{'/bookings/' + ${booking.bookingCode}}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-eye me-1"></i>View Details
+                        </a>
+                        <form th:if="${booking.status.name() == 'PENDING' or booking.status.name() == 'DEPOSIT_PAID'}"
+                              th:action="@{'/my-bookings/' + ${booking.id} + '/cancel'}"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 w-100">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${bookingsPage.totalPages > 1}" class="d-flex justify-content-center mb-5">
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-rounded gap-1">
+                <li class="page-item" th:classappend="${bookingsPage.first} ? 'disabled'">
+                    <a class="page-link shadow-none" th:href="@{/my-bookings(page=${bookingsPage.number - 1}, status=${currentStatusFilter})}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                <li th:each="p : ${#numbers.sequence(0, bookingsPage.totalPages - 1)}"
+                    class="page-item" th:classappend="${p == bookingsPage.number} ? 'active'">
+                    <a class="page-link shadow-none" th:href="@{/my-bookings(page=${p}, status=${currentStatusFilter})}" th:text="${p + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${bookingsPage.last} ? 'disabled'">
+                    <a class="page-link shadow-none" th:href="@{/my-bookings(page=${bookingsPage.number + 1}, status=${currentStatusFilter})}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</div>
+</body>
+</html>

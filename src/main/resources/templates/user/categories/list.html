@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title>Sports Categories - SportZone Arena</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Page Header Banner -->
+    <div class="category-header-banner p-4 p-md-5 rounded-4 mb-5 text-white position-relative overflow-hidden shadow-sm"
+         style="background: linear-gradient(135deg, #0b7285 0%, #084c5a 100%);">
+        <div class="position-relative" style="z-index: 2;">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-dark mb-2">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-white-50 text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">Sports Categories</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold mb-2 display-6">Explore Sports Categories</h1>
+            <p class="text-white-50 mb-0 lead fs-6" style="max-width: 600px;">
+                Choose your sport to find top-quality natural & synthetic pitches, air-conditioned indoor courts, and tournament-grade venues.
+            </p>
+        </div>
+        <div class="position-absolute end-0 bottom-0 opacity-10 pe-4 pb-3 d-none d-md-block" style="font-size: 8rem; line-height: 1;">
+            <i class="bi bi-trophy"></i>
+        </div>
+    </div>
+
+    <!-- Category Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+        <div class="col" th:each="cat : ${categories}">
+            <div class="card sport-card h-100 d-flex flex-column border-0 shadow-sm">
+                <!-- Category Image Cover -->
+                <div class="position-relative overflow-hidden" style="height: 190px; background-color: #e9ecef;">
+                    <img th:if="${cat.image != null and !cat.image.isEmpty()}"
+                         th:src="@{${cat.image}}"
+                         th:alt="${cat.name}"
+                         class="card-img-top h-100 object-fit-cover"
+                         loading="lazy" />
+                    <div th:unless="${cat.image != null and !cat.image.isEmpty()}"
+                         class="h-100 d-flex align-items-center justify-content-center text-muted fs-1">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <span class="position-absolute top-0 end-0 m-3 badge bg-dark bg-opacity-75 rounded-pill px-3 py-2 fw-medium shadow-sm">
+                        <i class="bi bi-geo-alt-fill text-warning me-1"></i>
+                        <span th:text="${cat.fields != null ? cat.fields.size() + ' Venues' : 'Available'}">Venues</span>
+                    </span>
+                </div>
+
+                <!-- Category Content -->
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <h4 class="card-title fw-bold text-dark mb-0" th:text="${cat.name}">Category Name</h4>
+                    </div>
+                    <p class="card-text text-muted small flex-grow-1 mb-4" th:text="${cat.description}">
+                        Sport category description and venue details.
+                    </p>
+                    <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+                        <span class="badge bg-info-subtle text-info-emphasis rounded-pill px-3 py-2 fw-semibold">
+                            <i class="bi bi-check-circle-fill me-1"></i>Instant Booking
+                        </span>
+                        <a th:href="@{'/categories/' + ${cat.id}}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                            Explore Fields <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

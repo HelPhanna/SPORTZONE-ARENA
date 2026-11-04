@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title th:text="'Edit Booking ' + ${booking.bookingCode} + ' - Admin'">Edit Booking</title>
+</head>
+<body>
+<div layout:fragment="page-title">Edit Booking</div>
+
+<div layout:fragment="content">
+    <!-- Header -->
+    <div class="mb-4">
+        <a th:href="@{'/admin/bookings/' + ${booking.id}}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2">
+            <i class="bi bi-arrow-left me-1"></i> Back to Details
+        </a>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <h3 class="fw-bold text-dark mb-0 font-monospace" th:text="'Edit Booking: ' + ${booking.bookingCode}">
+                Edit Booking #SB-001
+            </h3>
+            <span class="badge bg-light text-muted border">
+                ID: <span th:text="${booking.id}">1</span>
+            </span>
+        </div>
+        <p class="text-muted mb-0">Modify customer contact information, payment status, and booking lifecycle state.</p>
+    </div>
+
+    <form th:action="@{'/admin/bookings/' + ${booking.id} + '/edit'}" method="post">
+        <div class="row g-4">
+            <!-- Left Column: Primary Details -->
+            <div class="col-lg-7">
+                <!-- Customer Details Card -->
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-person-gear text-primary"></i>
+                            <span>Customer & Account Information</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Customer Name <span class="text-danger">*</span></label>
+                                <input type="text" name="customerName" th:value="${booking.customerName}" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Customer Phone <span class="text-danger">*</span></label>
+                                <input type="text" name="customerPhone" th:value="${booking.customerPhone}" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Linked Member Account</label>
+                                <select name="userId" class="form-select">
+                                    <option value="">-- No Account (Walk-in Guest) --</option>
+                                    <option th:each="user : ${users}"
+                                            th:value="${user.id}"
+                                            th:selected="${booking.user != null and booking.user.id == user.id}"
+                                            th:text="${user.name} + ' (' + ${user.email} + ')'">User Name</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Booking Source</label>
+                                <select name="source" class="form-select">
+                                    <option th:each="src : ${sources}"
+                                            th:value="${src}"
+                                            th:selected="${booking.source == src}"
+                                            th:text="${src.name()}">SOURCE</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facility Schedule Overview Card (Read-only reference) -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-calendar-check text-success"></i>
+                            <span>Reserved Facility & Time</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Facility Pitch:</span>
+                                <strong class="text-dark fs-6" th:text="${booking.field.name}">Field A</strong>
+                                <span class="badge bg-light text-primary border ms-1" th:text="${booking.field.category.name}">Football</span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Date:</span>
+                                <strong class="text-dark fs-6" th:text="${#temporals.format(booking.bookingDate, 'yyyy-MM-dd (EEEE)')}">2026-10-22</strong>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small d-block mb-1">Time Slot Range:</span>
+                            <div class="fw-bold font-monospace text-dark fs-6">
+                                <i class="bi bi-clock me-1 text-primary"></i>
+                                <span th:text="${#temporals.format(booking.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.endTime, 'HH:mm')}">08:00 - 10:00</span>
+                            </div>
+                            <div class="mt-2 d-flex flex-wrap gap-1">
+                                <span th:each="slot : ${booking.slots}" class="badge bg-white text-dark border p-1 px-2 font-monospace">
+                                    <span th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">Slot</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="alert alert-info small mt-3 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Changing status to <strong>CANCELLED</strong> or <strong>EXPIRED</strong> will immediately release and free these slots for new reservations.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Status & Financials -->
+            <div class="col-lg-5">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-currency-dollar text-primary"></i>
+                            <span>Status & Financial Updates</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Lifecycle Status <span class="text-danger">*</span></label>
+                            <select name="status" class="form-select fw-semibold" id="statusSelect" onchange="handleStatusChange()">
+                                <option th:each="st : ${statuses}"
+                                        th:value="${st}"
+                                        th:selected="${booking.status == st}"
+                                        th:text="${st.name()}">STATUS</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Total Price ($ USD) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">$</span>
+                                <input type="number" step="0.01" min="0" name="totalPrice" id="totalPriceInput"
+                                       th:value="${booking.totalPrice}" class="form-control fw-bold fs-5 text-primary" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-dark">Paid Amount ($ USD) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">$</span>
+                                <input type="number" step="0.01" min="0" name="paidAmount" id="paidAmountInput"
+                                       th:value="${booking.paidAmount}" class="form-control fw-bold text-success" required>
+                            </div>
+                            <small class="text-muted">Update total collected payment.</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Save Changes
+                            </button>
+                            <a th:href="@{'/admin/bookings/' + ${booking.id}}" class="btn btn-outline-secondary rounded-pill">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+    function handleStatusChange() {
+        const status = document.getElementById('statusSelect').value;
+        const total = parseFloat(document.getElementById('totalPriceInput').value) || 0;
+        const paidInput = document.getElementById('paidAmountInput');
+
+        if (status === 'PAID' || status === 'COMPLETED') {
+            if (parseFloat(paidInput.value) < total) {
+                paidInput.value = total.toFixed(2);
+            }
+        }
+    }
+</script>
+</th:block>
+</body>
+</html>

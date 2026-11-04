@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title>Register Account</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card auth-card shadow-sm p-4">
+                <div class="text-center mb-4">
+                    <div class="auth-logo-badge badge-register" title="Create SportZone Arena Account">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">Create an Account</h3>
+                    <p class="text-muted small mb-0">Join <span class="fw-semibold text-dark">SportZone Arena</span> to book fields easily</p>
+                </div>
+
+                <form th:action="@{/register}" th:object="${registerDto}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                    <!-- Full Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" id="name" th:field="*{name}"
+                                   class="form-control" th:errorclass="is-invalid"
+                                   placeholder="e.g. John Doe" required>
+                        </div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" id="email" th:field="*{email}"
+                                   class="form-control" th:errorclass="is-invalid"
+                                   placeholder="name@example.com" required>
+                        </div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="mb-3">
+                        <label for="phone" class="form-label fw-semibold">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                            <input type="text" id="phone" th:field="*{phone}"
+                                   class="form-control" th:errorclass="is-invalid"
+                                   placeholder="+855 12 345 678" required>
+                        </div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input type="password" id="password" th:field="*{password}"
+                                       class="form-control" th:errorclass="is-invalid"
+                                       placeholder="At least 6 chars" required>
+                            </div>
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="col-md-6 mb-3">
+                            <label for="confirmPassword" class="form-label fw-semibold">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-shield-check"></i></span>
+                                <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
+                                       class="form-control" th:errorclass="is-invalid"
+                                       placeholder="Repeat password" required>
+                            </div>
+                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="bi bi-check2-circle me-2"></i>Register Now
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <span class="text-muted">Already have an account?</span>
+                        <a th:href="@{/login}" class="fw-bold text-decoration-none">Sign In</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

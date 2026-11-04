@@ -1,0 +1,43 @@
+# Environment & Secret files (NEVER commit your credentials)
+.env
+.env.*
+!.env.example
+*.env
+
+# Build & Compiled artifacts
+target/
+build/
+out/
+bin/
+*.class
+*.jar
+*.war
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# User uploads & Logs
+uploads/
+*.log
+logs/
+hs_err_pid*
+replay_pid*
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Scratch files
+TestCrc.java
+HELP.md

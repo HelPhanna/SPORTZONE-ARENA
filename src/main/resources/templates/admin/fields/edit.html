@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title th:text="'Edit ' + ${field.name} + ' - Admin'">Edit Sports Facility</title>
+</head>
+<body>
+<div layout:fragment="page-title">Edit Sports Field</div>
+
+<div layout:fragment="content">
+    <div class="mb-4">
+        <a th:href="@{/admin/fields}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2">
+            <i class="bi bi-arrow-left me-1"></i> Back to Facilities
+        </a>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <h3 class="fw-bold text-dark mb-0" th:text="'Edit Facility: ' + ${field.name}">
+                Edit Facility
+            </h3>
+            <span class="badge bg-light text-muted border">ID: <span th:text="${field.id}">1</span></span>
+        </div>
+        <p class="text-muted mb-0">Modify pitch attributes, opening times, and pricing schedule.</p>
+    </div>
+
+    <form th:action="@{'/admin/fields/' + ${field.id} + '/edit'}" method="post">
+        <div class="row g-4">
+            <!-- Left Column: Primary Details -->
+            <div class="col-lg-8">
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-info-circle text-primary"></i>
+                            <span>Facility Information</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-semibold text-dark">Facility / Pitch Name <span class="text-danger">*</span></label>
+                                <input type="text" name="name" th:value="${field.name}" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-dark">Sport Category <span class="text-danger">*</span></label>
+                                <select name="categoryId" class="form-select" required>
+                                    <option th:each="cat : ${categories}"
+                                            th:value="${cat.id}"
+                                            th:selected="${field.category != null and field.category.id == cat.id}"
+                                            th:text="${cat.name}">Category</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-dark">Description</label>
+                                <textarea name="description" rows="3" class="form-control" th:text="${field.description}"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-dark">Main Image Path / URL</label>
+                                <input type="text" name="imageUrl" th:value="${mainImageUrl}" class="form-control" placeholder="e.g. /img/fields/football-1.jpg">
+                                <small class="text-muted">Relative path from /img or external secure URL.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operating Hours & Duration -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-clock-history text-primary"></i>
+                            <span>Schedule & Operating Hours</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-dark">Opening Time <span class="text-danger">*</span></label>
+                                <input type="time" name="openTime" th:value="${field.openTime}" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-dark">Closing Time <span class="text-danger">*</span></label>
+                                <input type="time" name="closeTime" th:value="${field.closeTime}" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-dark">Slot Duration (Minutes) <span class="text-danger">*</span></label>
+                                <input type="number" name="slotMinutes" th:value="${field.slotMinutes}" min="30" step="15" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Pricing & Availability -->
+            <div class="col-lg-4">
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-tag text-primary"></i>
+                            <span>Pricing & Status</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Standard Price / Slot ($) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="0" name="pricePerSlot" th:value="${field.pricePerSlot}" class="form-control fw-bold" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Peak Hours Price ($)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="0" name="peakPrice" th:value="${field.peakPrice}" class="form-control">
+                            </div>
+                            <small class="text-muted">Higher rate applied during busy evening hours.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Peak Start Time</label>
+                            <input type="time" name="peakStartTime" th:value="${field.peakStartTime}" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Deposit Required (%)</label>
+                            <div class="input-group">
+                                <input type="number" min="0" max="100" name="depositPercent" th:value="${field.depositPercent}" class="form-control">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-dark">Operational Status</label>
+                            <select name="status" class="form-select">
+                                <option th:each="st : ${statuses}"
+                                        th:value="${st}"
+                                        th:selected="${field.status == st}"
+                                        th:text="${st.name()}">STATUS</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Update Sports Facility
+                            </button>
+                            <a th:href="@{/admin/fields}" class="btn btn-outline-secondary rounded-pill">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Create New Booking</title>
+</head>
+<body>
+<div layout:fragment="page-title">Create Booking</div>
+
+<div layout:fragment="content">
+    <!-- Header -->
+    <div class="mb-4">
+        <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2">
+            <i class="bi bi-arrow-left me-1"></i> Back to Bookings
+        </a>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-calendar-plus text-primary me-2"></i>Create Walk-in / Facility Booking
+        </h3>
+        <p class="text-muted mb-0">Book pitch slots on behalf of walk-in or telephone clients with instant confirmation.</p>
+    </div>
+
+    <form th:action="@{/admin/bookings/create}" method="post" id="createBookingForm">
+        <div class="row g-4">
+            <!-- Left Column: Customer & Facility Selection -->
+            <div class="col-lg-7">
+                <!-- Customer Information Card -->
+                <div class="admin-card mb-4">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-person-badge text-primary"></i>
+                            <span>Customer Information</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <!-- Customer Type Toggle -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted">Customer Type</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="customerType" id="typeWalkin" value="walkin" checked onchange="toggleCustomerType()">
+                                    <label class="form-check-label fw-medium" for="typeWalkin">
+                                        Walk-in / Guest Customer
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="customerType" id="typeMember" value="member" onchange="toggleCustomerType()">
+                                    <label class="form-check-label fw-medium" for="typeMember">
+                                        Registered Member
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Registered Member Select -->
+                        <div class="mb-3 d-none" id="memberSelectGroup">
+                            <label class="form-label small fw-semibold text-dark">Select Registered Member</label>
+                            <select class="form-select" id="userSelect" name="userId" onchange="handleUserSelect()">
+                                <option value="">-- Choose Member --</option>
+                                <option th:each="user : ${users}"
+                                        th:value="${user.id}"
+                                        th:data-name="${user.name}"
+                                        th:data-phone="${user.phone}"
+                                        th:text="${user.name} + ' (' + ${user.email} + ')'">User Name</option>
+                            </select>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Customer Name <span class="text-danger">*</span></label>
+                                <input type="text" name="customerName" id="customerName" class="form-control" placeholder="e.g. Sokha Chan" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Phone Number <span class="text-danger">*</span></label>
+                                <input type="text" name="customerPhone" id="customerPhone" class="form-control" placeholder="e.g. +855 12 345 678" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Booking Source</label>
+                                <select name="source" class="form-select">
+                                    <option value="WALK_IN" selected>Walk-in / Counter</option>
+                                    <option value="ONLINE">Online / Phone</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Field & Slot Selection Card -->
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-flag-fill text-success"></i>
+                            <span>Pitch & Time Slot Selection</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Sports Facility <span class="text-danger">*</span></label>
+                                <select name="fieldId" id="fieldSelect" class="form-select" required onchange="onFieldOrDateChange()">
+                                    <option value="">-- Select Field --</option>
+                                    <option th:each="f : ${fields}"
+                                            th:value="${f.id}"
+                                            th:data-price="${f.pricePerSlot}"
+                                            th:data-peak-price="${f.peakPrice}"
+                                            th:data-peak-start="${f.peakStartTime}"
+                                            th:text="${f.name} + ' (' + ${f.category.name} + ' - $' + ${f.pricePerSlot} + '/slot)'">Field Name</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Reservation Date <span class="text-danger">*</span></label>
+                                <input type="date" name="bookingDate" id="bookingDateInput" class="form-control"
+                                       th:value="${today}" th:min="${today}" required onchange="onFieldOrDateChange()">
+                            </div>
+                        </div>
+
+                        <!-- Slots Grid -->
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label small fw-semibold text-dark mb-0">
+                                    Available Time Slots <span class="text-danger">*</span>
+                                </label>
+                                <small class="text-muted" id="slotStatusHint">Select field & date to load slots</small>
+                            </div>
+
+                            <div id="slotsContainer" class="row row-cols-2 row-cols-sm-3 g-2 p-3 bg-light rounded-3 border" style="min-height: 120px;">
+                                <div class="col-12 py-4 text-center text-muted">
+                                    <i class="bi bi-calendar2-range fs-3 d-block mb-1 opacity-50"></i>
+                                    <span>Please select a field to view live schedule slots.</span>
+                                </div>
+                            </div>
+
+                            <!-- Hidden inputs container for selected slots -->
+                            <div id="hiddenSlotsInputs"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Financials & Confirmation -->
+            <div class="col-lg-5">
+                <div class="admin-card sticky-top" style="top: 80px;">
+                    <div class="admin-card-header">
+                        <h5 class="admin-card-title">
+                            <i class="bi bi-receipt text-primary"></i>
+                            <span>Booking Summary & Payment</span>
+                        </h5>
+                    </div>
+                    <div class="admin-card-body">
+                        <!-- Selected Slots Summary -->
+                        <div class="p-3 bg-light rounded-3 border mb-3">
+                            <div class="d-flex justify-content-between text-muted small mb-1">
+                                <span>Selected Slots Count:</span>
+                                <strong id="summarySlotCount" class="text-dark">0 slot(s)</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted small mb-1">
+                                <span>Selected Slots Time:</span>
+                                <strong id="summarySlotTimes" class="text-dark">None</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted small pt-2 border-top">
+                                <span>Calculated Base:</span>
+                                <strong id="summaryCalculatedPrice" class="text-dark">$0.00</strong>
+                            </div>
+                        </div>
+
+                        <!-- Price & Payment Form Fields -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Total Price ($ USD) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">$</span>
+                                <input type="number" step="0.01" min="0" name="customPrice" id="customPriceInput"
+                                       class="form-control fw-bold fs-5 text-primary" placeholder="0.00" required oninput="onCustomPriceChange()">
+                            </div>
+                            <small class="text-muted">Auto-computed from slots, or override with special rate/discount.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Booking Status</label>
+                            <select name="status" id="bookingStatusSelect" class="form-select" onchange="onStatusChange()">
+                                <option value="PAID" selected>PAID - Full Payment Received</option>
+                                <option value="PENDING">PENDING - Payment Pending</option>
+                                <option value="DEPOSIT_PAID">DEPOSIT_PAID - Partial Deposit</option>
+                                <option value="COMPLETED">COMPLETED - Completed Session</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-dark">Paid Amount ($ USD)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">$</span>
+                                <input type="number" step="0.01" min="0" name="paidAmount" id="paidAmountInput"
+                                       class="form-control text-success fw-bold" placeholder="0.00">
+                            </div>
+                            <small class="text-muted">Set received payment (e.g. deposit or full sum).</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-semibold text-dark">Payment Method</label>
+                            <select name="paymentMethod" class="form-select">
+                                <option value="CASH" selected>Cash at Counter</option>
+                                <option value="KHQR">Bakong KHQR</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" id="submitBookingBtn" class="btn btn-primary btn-lg rounded-pill shadow-sm" disabled>
+                                <i class="bi bi-check2-circle me-1"></i> Confirm & Book Pitch
+                            </button>
+                            <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary rounded-pill">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+    const selectedSlots = new Map(); // key: slotTime, value: slot object
+
+    function toggleCustomerType() {
+        const isMember = document.getElementById('typeMember').checked;
+        const memberGroup = document.getElementById('memberSelectGroup');
+        if (isMember) {
+            memberGroup.classList.remove('d-none');
+        } else {
+            memberGroup.classList.add('d-none');
+            document.getElementById('userSelect').value = '';
+        }
+    }
+
+    function handleUserSelect() {
+        const select = document.getElementById('userSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            const name = selectedOption.getAttribute('data-name');
+            const phone = selectedOption.getAttribute('data-phone');
+            if (name) document.getElementById('customerName').value = name;
+            if (phone) document.getElementById('customerPhone').value = phone;
+        }
+    }
+
+    function onFieldOrDateChange() {
+        const fieldSelect = document.getElementById('fieldSelect');
+        const fieldId = fieldSelect.value;
+        const dateStr = document.getElementById('bookingDateInput').value;
+
+        if (!fieldId || !dateStr) {
+            return;
+        }
+
+        selectedSlots.clear();
+        updateSummary();
+
+        const container = document.getElementById('slotsContainer');
+        container.innerHTML = '<div class="col-12 py-3 text-center text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Checking field schedule...</div>';
+        document.getElementById('slotStatusHint').innerText = 'Loading live slots...';
+
+        fetch('/api/slots?fieldId=' + fieldId + '&date=' + dateStr)
+            .then(res => res.json())
+            .then(slots => {
+                container.innerHTML = '';
+                if (!slots || slots.length === 0) {
+                    container.innerHTML = '<div class="col-12 text-muted text-center py-3">No operational slots configured for this date.</div>';
+                    document.getElementById('slotStatusHint').innerText = '0 slots available';
+                    return;
+                }
+
+                const availableCount = slots.filter(s => (s.status === 'AVAILABLE' || s.isAvailable === true || s.available === true)).length;
+                document.getElementById('slotStatusHint').innerText = availableCount + ' slots available';
+
+                slots.forEach(slot => {
+                    const col = document.createElement('div');
+                    col.className = 'col';
+
+                    const isAvailable = (slot.status === 'AVAILABLE' || slot.isAvailable === true || slot.available === true);
+                    const isPeak = (slot.isPeak === true || slot.peak === true);
+                    const formattedPrice = (slot.price != null) ? Number(slot.price).toFixed(2) : '0.00';
+
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.setAttribute('data-slot', slot.formattedTime);
+                    btn.setAttribute('data-price', slot.price);
+                    btn.setAttribute('data-peak', isPeak);
+
+                    if (!isAvailable) {
+                        btn.disabled = true;
+                        btn.className = 'btn w-100 p-2 text-start rounded-3 btn-light text-muted opacity-50 border';
+                        btn.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold small">${slot.formattedTime}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.72rem;">
+                                <span>${slot.status}</span>
+                                <i class="bi bi-lock-fill"></i>
+                            </div>`;
+                    } else {
+                        btn.className = `btn w-100 p-2 text-start rounded-3 transition border ${isPeak ? 'btn-outline-warning border-warning' : 'btn-outline-primary border-primary-subtle'}`;
+                        btn.onclick = function() { toggleSlot(btn, slot); };
+                        btn.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold small">${slot.formattedTime}</span>
+                                ${isPeak ? '<span class="badge bg-warning text-dark" style="font-size: 0.65rem;">PEAK</span>' : ''}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1" style="font-size: 0.75rem;">
+                                <span>$${formattedPrice}</span>
+                                <i class="bi bi-plus-circle check-icon"></i>
+                            </div>`;
+                    }
+
+                    col.appendChild(btn);
+                    container.appendChild(col);
+                });
+            })
+            .catch(err => {
+                container.innerHTML = '<div class="col-12 text-danger text-center py-2">Error checking slots. Please retry.</div>';
+            });
+    }
+
+    function toggleSlot(btn, slot) {
+        const slotKey = slot.formattedTime;
+        if (selectedSlots.has(slotKey)) {
+            selectedSlots.delete(slotKey);
+            btn.classList.remove('btn-primary', 'text-white');
+            btn.classList.add(slot.isPeak ? 'btn-outline-warning' : 'btn-outline-primary');
+            const icon = btn.querySelector('.check-icon');
+            if (icon) {
+                icon.className = 'bi bi-plus-circle check-icon';
+            }
+        } else {
+            selectedSlots.set(slotKey, slot);
+            btn.classList.remove('btn-outline-primary', 'btn-outline-warning');
+            btn.classList.add('btn-primary', 'text-white');
+            const icon = btn.querySelector('.check-icon');
+            if (icon) {
+                icon.className = 'bi bi-check-circle-fill check-icon';
+            }
+        }
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const count = selectedSlots.size;
+        let total = 0;
+        const slotNames = [];
+
+        selectedSlots.forEach((slot, key) => {
+            total += parseFloat(slot.price);
+            slotNames.push(key);
+        });
+
+        document.getElementById('summarySlotCount').innerText = count + ' slot(s)';
+        document.getElementById('summarySlotTimes').innerText = count > 0 ? slotNames.join(', ') : 'None';
+        document.getElementById('summaryCalculatedPrice').innerText = '$' + total.toFixed(2);
+
+        document.getElementById('customPriceInput').value = total.toFixed(2);
+
+        onStatusChange();
+
+        // Update hidden inputs for form submission
+        const hiddenContainer = document.getElementById('hiddenSlotsInputs');
+        hiddenContainer.innerHTML = '';
+        selectedSlots.forEach((slot, key) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'slots';
+            input.value = key;
+            hiddenContainer.appendChild(input);
+        });
+
+        document.getElementById('submitBookingBtn').disabled = (count === 0);
+    }
+
+    function onStatusChange() {
+        const status = document.getElementById('bookingStatusSelect').value;
+        const total = parseFloat(document.getElementById('customPriceInput').value) || 0;
+        const paidInput = document.getElementById('paidAmountInput');
+
+        if (status === 'PAID' || status === 'COMPLETED') {
+            paidInput.value = total.toFixed(2);
+        } else if (status === 'PENDING') {
+            paidInput.value = '0.00';
+        }
+    }
+
+    function onCustomPriceChange() {
+        const status = document.getElementById('bookingStatusSelect').value;
+        if (status === 'PAID' || status === 'COMPLETED') {
+            const total = parseFloat(document.getElementById('customPriceInput').value) || 0;
+            document.getElementById('paidAmountInput').value = total.toFixed(2);
+        }
+    }
+</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Booking Management</title>
+</head>
+<body>
+<div layout:fragment="page-title">Bookings</div>
+
+<div layout:fragment="content">
+    <!-- Top Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-calendar2-check-fill text-primary me-2"></i>Field Bookings
+            </h3>
+            <p class="text-muted mb-0">Monitor, create, inspect, update, and manage sports pitch reservations.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/admin/bookings/create}" class="btn btn-primary rounded-pill px-3 shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="bi bi-plus-circle-fill"></i>
+                <span class="fw-semibold">New Booking</span>
+            </a>
+            <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Status KPI Pills -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <a th:href="@{/admin/bookings}" class="text-decoration-none">
+                <div class="stat-card p-3 border" th:classappend="${selectedStatus == null and keyword == null and selectedFieldId == null} ? 'border-primary shadow-sm bg-primary-subtle' : ''">
+                    <div class="stat-card-title small mb-1">All Bookings</div>
+                    <div class="h4 fw-bold text-dark mb-0" th:text="${totalBookingsCount}">0</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a th:href="@{/admin/bookings(status='PENDING')}" class="text-decoration-none">
+                <div class="stat-card p-3 border" th:classappend="${selectedStatus?.name() == 'PENDING'} ? 'border-warning shadow-sm bg-warning-subtle' : ''">
+                    <div class="stat-card-title small text-warning-emphasis mb-1">Pending</div>
+                    <div class="h4 fw-bold text-warning-emphasis mb-0" th:text="${pendingCount}">0</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a th:href="@{/admin/bookings(status='PAID')}" class="text-decoration-none">
+                <div class="stat-card p-3 border" th:classappend="${selectedStatus?.name() == 'PAID'} ? 'border-success shadow-sm bg-success-subtle' : ''">
+                    <div class="stat-card-title small text-success mb-1">Paid / Confirmed</div>
+                    <div class="h4 fw-bold text-success mb-0" th:text="${paidCount}">0</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a th:href="@{/admin/bookings(status='COMPLETED')}" class="text-decoration-none">
+                <div class="stat-card p-3 border" th:classappend="${selectedStatus?.name() == 'COMPLETED'} ? 'border-info shadow-sm bg-info-subtle' : ''">
+                    <div class="stat-card-title small text-info-emphasis mb-1">Completed</div>
+                    <div class="h4 fw-bold text-info-emphasis mb-0" th:text="${completedCount}">0</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <a th:href="@{/admin/bookings(status='CANCELLED')}" class="text-decoration-none">
+                <div class="stat-card p-3 border" th:classappend="${selectedStatus?.name() == 'CANCELLED'} ? 'border-danger shadow-sm bg-danger-subtle' : ''">
+                    <div class="stat-card-title small text-danger mb-1">Cancelled</div>
+                    <div class="h4 fw-bold text-danger mb-0" th:text="${cancelledCount}">0</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-body p-3">
+            <form th:action="@{/admin/bookings}" method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label small text-muted mb-1">Search Keyword</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="keyword" th:value="${keyword}" class="form-control border-start-0" placeholder="Code, Name, Phone...">
+                    </div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Facility Field</label>
+                    <select name="fieldId" class="form-select form-select-sm">
+                        <option value="">All Fields</option>
+                        <option th:each="f : ${fields}" th:value="${f.id}" th:text="${f.name}"
+                                th:selected="${f.id == selectedFieldId}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Sport Category</label>
+                    <select name="categoryId" class="form-select form-select-sm">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
+                                th:selected="${cat.id == selectedCategoryId}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Booking Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option th:each="st : ${statuses}" th:value="${st}" th:text="${st.name()}"
+                                th:selected="${st == selectedStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-1">
+                    <label class="form-label small text-muted mb-1">Start Date</label>
+                    <input type="date" name="startDate" th:value="${startDate}" class="form-control form-control-sm">
+                </div>
+                <div class="col-6 col-md-1">
+                    <label class="form-label small text-muted mb-1">End Date</label>
+                    <input type="date" name="endDate" th:value="${endDate}" class="form-control form-control-sm">
+                </div>
+                <div class="col-12 col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1 rounded-3" title="Apply Filters">
+                        <i class="bi bi-funnel-fill"></i>
+                    </button>
+                    <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary btn-sm rounded-3" title="Reset Filters">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bookings Table Card -->
+    <div class="admin-card">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
+            <h5 class="admin-card-title mb-0">
+                <i class="bi bi-list-check text-primary"></i>
+                <span>Reservations List</span>
+            </h5>
+            <span class="badge bg-light text-dark border" th:text="${bookingsPage.totalElements} + ' total records'">0 total records</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Customer</th>
+                        <th>Field / Category</th>
+                        <th>Date & Time</th>
+                        <th>Payment</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${bookingsPage.content.isEmpty()}">
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <h6 class="fw-bold">No bookings found</h6>
+                            <p class="small mb-3">Try adjusting your filters or create a new booking.</p>
+                            <a th:href="@{/admin/bookings/create}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                <i class="bi bi-plus-circle me-1"></i> Create Booking
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:each="booking : ${bookingsPage.content}">
+                        <td>
+                            <a th:href="@{'/admin/bookings/' + ${booking.id}}" class="fw-bold font-monospace text-primary text-decoration-none" th:text="${booking.bookingCode}">
+                                #SB-001
+                            </a>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${booking.customerName}">Customer Name</div>
+                            <small class="text-muted d-block" th:text="${booking.customerPhone}">+85512345678</small>
+                            <span th:if="${booking.user != null}" class="badge bg-info-subtle text-info border border-info-subtle" style="font-size: 0.65rem;">
+                                <i class="bi bi-person-check-fill me-1"></i>Member
+                            </span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${booking.field.name}">Field</div>
+                            <span class="badge bg-light text-secondary border" th:text="${booking.field.category.name}">Category</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${#temporals.format(booking.bookingDate, 'yyyy-MM-dd')}">2026-10-22</div>
+                            <small class="text-muted" th:text="${#temporals.format(booking.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.endTime, 'HH:mm')}">08:00 - 09:00</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-success" th:text="'$' + ${#numbers.formatDecimal(booking.paidAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</div>
+                            <small class="text-muted" th:text="'Total: $' + ${#numbers.formatDecimal(booking.totalPrice, 1, 'COMMA', 2, 'POINT')}">Total: $0.00</small>
+                        </td>
+                        <td>
+                            <span th:if="${booking.source.name() == 'ONLINE'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">Online</span>
+                            <span th:if="${booking.source.name() == 'WALK_IN'}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Walk-in</span>
+                        </td>
+                        <td>
+                            <span th:if="${booking.status.name() == 'PENDING'}" class="badge-status badge-status-pending">Pending</span>
+                            <span th:if="${booking.status.name() == 'DEPOSIT_PAID'}" class="badge-status badge-status-deposit">Deposit</span>
+                            <span th:if="${booking.status.name() == 'PAID'}" class="badge-status badge-status-paid">Paid</span>
+                            <span th:if="${booking.status.name() == 'COMPLETED'}" class="badge-status badge-status-completed">Completed</span>
+                            <span th:if="${booking.status.name() == 'CANCELLED'}" class="badge-status badge-status-cancelled">Cancelled</span>
+                            <span th:if="${booking.status.name() == 'EXPIRED'}" class="badge-status badge-status-inactive">Expired</span>
+                        </td>
+                        <td class="text-end pe-3">
+                            <div class="d-inline-flex align-items-center gap-1">
+                                <!-- View Detail Button -->
+                                <a th:href="@{'/admin/bookings/' + ${booking.id}}" class="btn btn-sm btn-outline-primary rounded-circle p-1" style="width: 32px; height: 32px;" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <!-- Edit Button -->
+                                <a th:href="@{'/admin/bookings/' + ${booking.id} + '/edit'}" class="btn btn-sm btn-outline-secondary rounded-circle p-1" style="width: 32px; height: 32px;" title="Edit Booking">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <!-- Quick Actions Dropdown -->
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm btn-outline-dark rounded-circle p-1" style="width: 32px; height: 32px;" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Quick Actions">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                        <li><h6 class="dropdown-header">Quick Status</h6></li>
+                                        <li th:if="${booking.status.name() != 'PAID'}">
+                                            <form th:action="@{'/admin/bookings/' + ${booking.id} + '/status'}" method="post" class="m-0 p-0">
+                                                <input type="hidden" name="status" value="PAID">
+                                                <button type="submit" class="dropdown-item text-success py-2">
+                                                    <i class="bi bi-check2-circle me-2"></i>Mark as Paid
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li th:if="${booking.status.name() != 'COMPLETED'}">
+                                            <form th:action="@{'/admin/bookings/' + ${booking.id} + '/status'}" method="post" class="m-0 p-0">
+                                                <input type="hidden" name="status" value="COMPLETED">
+                                                <button type="submit" class="dropdown-item text-info py-2">
+                                                    <i class="bi bi-flag-fill me-2"></i>Mark as Completed
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li th:if="${booking.status.name() != 'CANCELLED'}">
+                                            <form th:action="@{'/admin/bookings/' + ${booking.id} + '/status'}" method="post" class="m-0 p-0">
+                                                <input type="hidden" name="status" value="CANCELLED">
+                                                <button type="submit" class="dropdown-item text-warning-emphasis py-2">
+                                                    <i class="bi bi-x-circle me-2"></i>Cancel Booking
+                                                </button>
+                                            </form>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            <button type="button" class="dropdown-item text-danger py-2"
+                                                    th:data-booking-id="${booking.id}"
+                                                    th:data-booking-code="${booking.bookingCode}"
+                                                    onclick="openDeleteModal(this)">
+                                                <i class="bi bi-trash me-2"></i>Delete Record
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${bookingsPage.totalPages > 1}" class="p-3 border-top d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+            <span class="text-muted small">
+                Showing page <strong th:text="${bookingsPage.number + 1}">1</strong> of <strong th:text="${bookingsPage.totalPages}">1</strong>
+                (<span th:text="${bookingsPage.totalElements}">0</span> total bookings)
+            </span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${bookingsPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/bookings(page=${bookingsPage.number - 1}, keyword=${keyword}, fieldId=${selectedFieldId}, categoryId=${selectedCategoryId}, status=${selectedStatus}, startDate=${startDate}, endDate=${endDate})}">Previous</a>
+                </li>
+                <li class="page-item" th:each="p : ${#numbers.sequence(0, bookingsPage.totalPages - 1)}"
+                    th:if="${p >= bookingsPage.number - 2 and p <= bookingsPage.number + 2}"
+                    th:classappend="${p == bookingsPage.number} ? 'active' : ''">
+                    <a class="page-link" th:text="${p + 1}"
+                       th:href="@{/admin/bookings(page=${p}, keyword=${keyword}, fieldId=${selectedFieldId}, categoryId=${selectedCategoryId}, status=${selectedStatus}, startDate=${startDate}, endDate=${endDate})}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${bookingsPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/bookings(page=${bookingsPage.number + 1}, keyword=${keyword}, fieldId=${selectedFieldId}, categoryId=${selectedCategoryId}, status=${selectedStatus}, startDate=${startDate}, endDate=${endDate})}">Next</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Booking
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="deleteBookingForm" method="post" action="">
+                    <div class="modal-body py-4">
+                        <p class="mb-2">Are you sure you want to permanently delete booking <strong id="deleteBookingCodeText" class="text-dark font-monospace">#SB-000</strong>?</p>
+                        <div class="alert alert-warning small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            This action will permanently delete the booking record, payment transactions, and free up its reserved pitch time slots.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">
+                            <i class="bi bi-trash me-1"></i>Delete Permanently
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+    function openDeleteModal(btn) {
+        const bookingId = btn.getAttribute('data-booking-id');
+        const bookingCode = btn.getAttribute('data-booking-code');
+
+        document.getElementById('deleteBookingCodeText').innerText = '#' + bookingCode;
+        document.getElementById('deleteBookingForm').action = '/admin/bookings/' + bookingId + '/delete';
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        modal.show();
+    }
+</script>
+</th:block>
+</body>
+</html>

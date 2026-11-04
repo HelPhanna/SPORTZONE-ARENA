@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+<div layout:fragment="page-title">Dashboard Overview</div>
+
+<div layout:fragment="content">
+    <!-- Welcome Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                <span>Welcome back, Admin</span>
+                <span class="fs-4">👋</span>
+            </h3>
+            <p class="text-muted mb-0">Here's your facility utilization, active bookings, and revenue metrics overview.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-white text-secondary border px-3 py-2 shadow-sm rounded-pill d-flex align-items-center gap-2">
+                <i class="bi bi-calendar3 text-primary"></i>
+                <span th:text="${#temporals.format(today, 'EEEE, MMMM dd, yyyy')}">Thursday, Oct 22, 2026</span>
+            </span>
+            <a th:href="@{/admin/bookings}" class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm d-flex align-items-center gap-1">
+                <i class="bi bi-calendar-plus"></i> View Schedule
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Key Metric KPI Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Metric 1: Today's Revenue -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-inner">
+                    <div>
+                        <div class="stat-card-title">Today's Revenue</div>
+                        <div class="stat-card-value text-success" th:text="'$' + ${#numbers.formatDecimal(todayRevenue, 1, 'COMMA', 2, 'POINT')}">$0.00</div>
+                        <div class="stat-card-sub text-muted">
+                            <i class="bi bi-wallet2 text-success"></i>
+                            <span>Lifetime: <strong th:text="'$' + ${#numbers.formatDecimal(totalRevenue, 1, 'COMMA', 2, 'POINT')}">$0.00</strong></span>
+                        </div>
+                    </div>
+                    <div class="stat-icon-wrapper stat-icon-revenue">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric 2: Today's Bookings -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-inner">
+                    <div>
+                        <div class="stat-card-title">Today's Bookings</div>
+                        <div class="stat-card-value text-primary" th:text="${todayBookingsCount}">0</div>
+                        <div class="stat-card-sub">
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">
+                                <span th:text="${pendingBookingsCount}">0</span> Pending Review
+                            </span>
+                        </div>
+                    </div>
+                    <div class="stat-icon-wrapper stat-icon-bookings">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric 3: Active Sports Fields -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-inner">
+                    <div>
+                        <div class="stat-card-title">Sports Facilities</div>
+                        <div class="stat-card-value text-warning-emphasis">
+                            <span th:text="${activeFieldsCount}">0</span>
+                            <span class="fs-6 fw-normal text-muted" th:text="'/ ' + ${totalFieldsCount}">/ 0</span>
+                        </div>
+                        <div class="stat-card-sub text-muted">
+                            <i class="bi bi-grid-3x3-gap-fill text-warning"></i>
+                            <span th:text="${totalCategoriesCount} + ' Sports Categories'">6 Categories</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon-wrapper stat-icon-fields">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric 4: Registered Customers -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-card-inner">
+                    <div>
+                        <div class="stat-card-title">Registered Players</div>
+                        <div class="stat-card-value text-purple" style="color: #7c3aed;" th:text="${totalUsersCount}">0</div>
+                        <div class="stat-card-sub text-muted">
+                            <i class="bi bi-person-check-fill" style="color: #7c3aed;"></i>
+                            <span>Active Customer Accounts</span>
+                        </div>
+                    </div>
+                    <div class="stat-icon-wrapper stat-icon-users">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- 7-Day Revenue & Bookings Trend Chart -->
+        <div class="col-12 col-lg-8">
+            <div class="admin-card h-100">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-graph-up-arrow text-primary"></i>
+                        <span>Weekly Activity & Revenue Trend</span>
+                    </h5>
+                    <span class="badge bg-light text-muted border">Last 7 Days</span>
+                </div>
+                <div class="admin-card-body">
+                    <div style="height: 280px; position: relative;">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sport Category Distribution Chart -->
+        <div class="col-12 col-lg-4">
+            <div class="admin-card h-100">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-pie-chart-fill text-warning"></i>
+                        <span>Sports Breakdown</span>
+                    </h5>
+                    <a th:href="@{/admin/categories}" class="btn btn-sm btn-link text-decoration-none p-0 text-muted">View</a>
+                </div>
+                <div class="admin-card-body d-flex flex-column align-items-center justify-content-center">
+                    <div style="height: 220px; width: 100%; max-width: 260px; position: relative;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="w-100 mt-3 pt-3 border-top">
+                        <div class="d-flex justify-content-between text-muted small">
+                            <span>Total Categories: <strong class="text-dark" th:text="${totalCategoriesCount}">6</strong></span>
+                            <span>Total Fields: <strong class="text-dark" th:text="${totalFieldsCount}">14</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Operations Hub -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <a th:href="@{/admin/bookings}" class="quick-action-btn">
+                <i class="bi bi-calendar2-week text-primary"></i>
+                <span class="fw-bold fs-6">Manage Bookings</span>
+                <small class="text-muted">Review, confirm or cancel slots</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a th:href="@{/admin/fields}" class="quick-action-btn">
+                <i class="bi bi-flag text-success"></i>
+                <span class="fw-bold fs-6">Manage Fields</span>
+                <small class="text-muted">Prices, opening hours & slots</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a th:href="@{/admin/users}" class="quick-action-btn">
+                <i class="bi bi-people text-info"></i>
+                <span class="fw-bold fs-6">Customer Directory</span>
+                <small class="text-muted">User accounts & privileges</small>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a th:href="@{/admin/payments}" class="quick-action-btn">
+                <i class="bi bi-qr-code-scan text-warning"></i>
+                <span class="fw-bold fs-6">Bakong KHQR Payments</span>
+                <small class="text-muted">Transactions & verification</small>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Bookings Table -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title">
+                <i class="bi bi-clock-history text-primary"></i>
+                <span>Recent Bookings</span>
+            </h5>
+            <a th:href="@{/admin/bookings}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                View All Bookings <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Booking Code</th>
+                        <th>Customer</th>
+                        <th>Field / Sport</th>
+                        <th>Date & Time</th>
+                        <th>Amount Paid</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${recentBookings == null or #lists.isEmpty(recentBookings)}">
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <h6 class="fw-bold text-dark">No Bookings Found</h6>
+                            <p class="small mb-0">When customers place reservations, they will appear here in real-time.</p>
+                        </td>
+                    </tr>
+                    <tr th:each="booking : ${recentBookings}">
+                        <td>
+                            <span class="fw-bold text-dark font-monospace" th:text="${booking.bookingCode}">#SPB-001</span>
+                            <small class="d-block text-muted" th:text="${booking.source}">ONLINE</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${booking.customerName}">Customer Name</div>
+                            <small class="text-muted" th:text="${booking.customerPhone}">+85512345678</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${booking.field.name}">Field Name</div>
+                            <span class="badge bg-light text-secondary border" th:text="${booking.field.category.name}">Category</span>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark" th:text="${#temporals.format(booking.bookingDate, 'yyyy-MM-dd')}">2026-10-22</div>
+                            <small class="text-muted" th:text="${#temporals.format(booking.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.endTime, 'HH:mm')}">08:00 - 09:00</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark" th:text="'$' + ${#numbers.formatDecimal(booking.paidAmount, 1, 'COMMA', 2, 'POINT')}">$0.00</div>
+                            <small class="text-muted" th:text="'Total: $' + ${#numbers.formatDecimal(booking.totalPrice, 1, 'COMMA', 2, 'POINT')}">Total: $0.00</small>
+                        </td>
+                        <td>
+                            <span th:if="${booking.status.name() == 'PENDING'}" class="badge-status badge-status-pending">
+                                <i class="bi bi-hourglass-split"></i> Pending
+                            </span>
+                            <span th:if="${booking.status.name() == 'DEPOSIT_PAID'}" class="badge-status badge-status-deposit">
+                                <i class="bi bi-cash-coin"></i> Deposit Paid
+                            </span>
+                            <span th:if="${booking.status.name() == 'PAID'}" class="badge-status badge-status-paid">
+                                <i class="bi bi-check-circle-fill"></i> Paid
+                            </span>
+                            <span th:if="${booking.status.name() == 'COMPLETED'}" class="badge-status badge-status-completed">
+                                <i class="bi bi-award-fill"></i> Completed
+                            </span>
+                            <span th:if="${booking.status.name() == 'CANCELLED'}" class="badge-status badge-status-cancelled">
+                                <i class="bi bi-x-circle-fill"></i> Cancelled
+                            </span>
+                            <span th:if="${booking.status.name() == 'EXPIRED'}" class="badge-status badge-status-inactive">
+                                <i class="bi bi-clock"></i> Expired
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{'/admin/bookings?keyword=' + ${booking.bookingCode}}" class="btn btn-sm btn-light border px-2 py-1 text-secondary" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sports Facilities Quick Status Cards -->
+    <div class="admin-card">
+        <div class="admin-card-header">
+            <h5 class="admin-card-title">
+                <i class="bi bi-flag-fill text-success"></i>
+                <span>Facilities Overview</span>
+            </h5>
+            <a th:href="@{/admin/fields}" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                All Fields <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="admin-card-body">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                <div class="col" th:each="cat : ${categories}">
+                    <div class="p-3 rounded-4 border bg-light d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle overflow-hidden border border-2 border-white shadow-sm d-flex align-items-center justify-content-center bg-white" style="width: 48px; height: 48px; min-width: 48px;">
+                                <img th:if="${cat.image != null and !cat.image.isEmpty()}" th:src="@{${cat.image}}" th:alt="${cat.name}" class="w-100 h-100 object-fit-cover" />
+                                <i th:unless="${cat.image != null and !cat.image.isEmpty()}" class="bi bi-trophy text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold text-dark mb-0" th:text="${cat.name}">Football</h6>
+                                <small class="text-muted" th:text="${cat.fields != null ? cat.fields.size() + ' pitches configured' : 'Active'}">Pitches</small>
+                            </div>
+                        </div>
+                        <a th:href="@{'/admin/fields?categoryId=' + ${cat.id}}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                            Fields
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script th:inline="javascript">
+    /* Chart.js Interactive Dashboards */
+    document.addEventListener('DOMContentLoaded', function () {
+        const labels = /*[[${chartLabels}]]*/ ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Today'];
+        const bookingData = /*[[${chartBookings}]]*/ [0, 0, 0, 0, 0, 0, 0];
+        const revenueData = /*[[${chartRevenue}]]*/ [0, 0, 0, 0, 0, 0, 0];
+
+        // 1. Weekly Activity & Revenue Dual Chart
+        const weeklyCtx = document.getElementById('weeklyChart');
+        if (weeklyCtx) {
+            new Chart(weeklyCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Bookings',
+                            data: bookingData,
+                            backgroundColor: 'rgba(14, 165, 233, 0.85)',
+                            borderRadius: 6,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Revenue ($)',
+                            data: revenueData,
+                            type: 'line',
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+                            tension: 0.35,
+                            fill: true,
+                            pointBackgroundColor: '#10b981',
+                            pointRadius: 4,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 12,
+                                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                callback: function(value) { return '$' + value; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Category Breakdown Doughnut Chart
+        const categoryCtx = document.getElementById('categoryChart');
+        if (categoryCtx) {
+            const catLabels = /*[[${categoryNames}]]*/ ['Football', 'Futsal', 'Badminton', 'Tennis', 'Basketball', 'Volleyball'];
+            const catCounts = /*[[${categoryFieldCounts}]]*/ [3, 2, 3, 2, 2, 2];
+
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catCounts.length > 0 ? catCounts : [3, 2, 3, 2, 2, 2],
+                        backgroundColor: [
+                            '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#64748b'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" }
+                            }
+                        }
+                    },
+                    cutout: '68%'
+                }
+            });
+        }
+    });
+</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title th:text="'Booking ' + ${booking.bookingCode} + ' - SportZone Arena'">Booking Confirmation</title>
+    <style>
+        @media print {
+            .no-print, header, nav, footer, .btn, .khqr-payment-card {
+                display: none !important;
+            }
+            .print-receipt {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="row justify-content-center my-4">
+        <div class="col-lg-8">
+
+            <!-- Success/Status Banner -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden print-receipt bg-white">
+                <div class="p-4 text-white d-flex flex-wrap justify-content-between align-items-center gap-3"
+                     th:classappend="${booking.status.name() == 'PAID' or booking.status.name() == 'COMPLETED'} ? 'bg-success' : (${booking.status.name() == 'PENDING'} ? 'bg-primary' : 'bg-secondary')">
+                    <div>
+                        <span class="badge bg-white bg-opacity-25 rounded-pill px-3 py-1 mb-1 text-white">
+                            <i class="bi bi-ticket-perforated me-1"></i>Booking Code
+                        </span>
+                        <h3 class="fw-bold mb-0 font-monospace" th:text="${booking.bookingCode}">SB-20261023-00001</h3>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge rounded-pill px-3 py-2 fs-6 shadow-sm"
+                              th:classappend="${booking.status.name() == 'PAID' or booking.status.name() == 'COMPLETED'} ? 'bg-white text-success fw-bold' : (${booking.status.name() == 'PENDING'} ? 'bg-warning text-dark fw-bold' : 'bg-dark text-white')">
+                            <i th:if="${booking.status.name() == 'PAID'}" class="bi bi-check-circle-fill me-1"></i>
+                            <i th:if="${booking.status.name() == 'PENDING'}" class="bi bi-clock-history me-1"></i>
+                            <span th:text="${booking.status.name()}">STATUS</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Booking Details Body -->
+                <div class="card-body p-4 p-md-5">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-2">Venue & Sport</h6>
+                            <h5 class="fw-bold text-dark mb-1" th:text="${booking.field.name}">Field Name</h5>
+                            <span class="badge bg-light text-primary border px-2 py-1" th:text="${booking.field.category.name}">Category</span>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-2">Reserved Schedule</h6>
+                            <div class="d-flex align-items-center text-dark fw-semibold mb-1">
+                                <i class="bi bi-calendar3 text-primary me-2 fs-5"></i>
+                                <span th:text="${#temporals.format(booking.bookingDate, 'EEEE, dd MMMM yyyy')}">Date</span>
+                            </div>
+                            <div class="d-flex align-items-center text-muted small">
+                                <i class="bi bi-clock text-primary me-2 fs-5"></i>
+                                <span th:text="${#temporals.format(booking.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(booking.endTime, 'HH:mm')}">Time</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individual Slots List -->
+                    <div class="mb-4">
+                        <h6 class="text-muted text-uppercase small fw-bold mb-2">Reserved Time Slots</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span th:each="slot : ${booking.slots}" class="badge bg-light text-dark border p-2 px-3 rounded-3 font-monospace">
+                                <i class="bi bi-check2-circle text-success me-1"></i>
+                                <span th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">Slot</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-muted opacity-25">
+
+                    <!-- Customer Info & Payment Breakdown -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase small fw-bold mb-2">Customer Information</h6>
+                            <p class="mb-1"><strong>Name:</strong> <span th:text="${booking.customerName}">Name</span></p>
+                            <p class="mb-1"><strong>Phone:</strong> <span th:text="${booking.customerPhone}">Phone</span></p>
+                            <p class="text-muted small mb-0"><strong>Booked At:</strong> <span th:text="${#temporals.format(booking.createdAt, 'dd/MM/yyyy HH:mm')}">Time</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 border">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Total Amount:</span>
+                                    <strong class="text-dark" th:text="'$' + ${booking.totalPrice}">$0.00</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Paid Amount:</span>
+                                    <strong class="text-success" th:text="'$' + ${booking.paidAmount}">$0.00</strong>
+                                </div>
+                                <div class="d-flex justify-content-between pt-2 border-top">
+                                    <span class="fw-bold">Payment Status:</span>
+                                    <span class="fw-bold"
+                                          th:classappend="${booking.status.name() == 'PAID' or booking.status.name() == 'COMPLETED'} ? 'text-success' : 'text-warning'"
+                                          th:text="${booking.status.name() == 'PAID' or booking.status.name() == 'COMPLETED' ? 'COMPLETED' : 'PENDING PAYMENT'}">
+                                        Status
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bakong KHQR Payment Box (Shown when PENDING) -->
+                    <div th:if="${booking.status.name() == 'PENDING'}" class="khqr-payment-card p-4 rounded-4 bg-light border text-center my-4">
+                        <div class="d-inline-flex align-items-center bg-danger text-white rounded-pill px-3 py-1 mb-3">
+                            <i class="bi bi-qr-code-scan me-2"></i>Bakong KHQR Payment
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1">Scan to Pay with Any Banking App</h4>
+                        <p class="text-muted small mb-4">Supported by ABA, Wing, Acleda, Canadia, Sathapana, and all Bakong member banks.</p>
+
+                        <!-- KHQR Visual QR Card -->
+                        <div class="d-inline-block p-4 bg-white rounded-4 shadow-sm border mb-3 text-center" style="max-width: 320px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                                <span class="fw-bold text-danger"><i class="bi bi-qr-code me-1"></i>KHQR</span>
+                                <span class="badge bg-danger rounded-pill">USD</span>
+                            </div>
+                            <!-- Real ZXing in-memory generated QR representation -->
+                            <div class="p-2 border rounded-3 bg-white d-inline-block">
+                                <img th:if="${qrImageBase64 != null}"
+                                     th:src="${qrImageBase64}"
+                                     class="img-fluid rounded"
+                                     style="width: 200px; height: 200px;"
+                                     alt="Bakong KHQR">
+                                <img th:unless="${qrImageBase64 != null}"
+                                     th:src="'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + ${payment != null ? payment.khqrString : booking.bookingCode}"
+                                     class="img-fluid rounded"
+                                     style="width: 200px; height: 200px;"
+                                     alt="Bakong KHQR">
+                            </div>
+                            <div class="mt-2 text-center">
+                                <span class="text-muted small d-block">SportZone Arena</span>
+                                <strong class="fs-4 text-dark" th:text="'$' + ${booking.totalPrice}">$0.00</strong>
+                            </div>
+                        </div>
+
+                        <!-- Test Action Button (Visible only when Mock Mode is active) -->
+                        <div class="mt-3" th:if="${mockMode}">
+                            <form th:action="@{'/bookings/' + ${booking.bookingCode} + '/simulate-pay'}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-lg rounded-pill px-4 shadow-sm fw-semibold">
+                                    <i class="bi bi-check2-circle me-1"></i>Simulate Instant Payment (KHQR Demo)
+                                </button>
+                            </form>
+                        </div>
+                        <small class="text-muted d-block mt-2" th:if="${mockMode}">
+                            <i class="bi bi-info-circle me-1"></i>Mock payment mode is enabled. Click above to simulate real-time webhook callback.
+                        </small>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top no-print">
+                        <a th:href="@{/my-bookings}" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="bi bi-calendar-check me-1"></i>My Bookings
+                        </a>
+                        <div class="d-flex gap-2">
+                            <button onclick="window.print()" class="btn btn-outline-dark rounded-pill px-3">
+                                <i class="bi bi-printer me-1"></i>Print Receipt
+                            </button>
+                            <a th:href="@{/fields}" class="btn btn-primary rounded-pill px-4">
+                                <i class="bi bi-plus-circle me-1"></i>Book Another Field
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+<script th:inline="javascript">
+/*<![CDATA[*/
+    const bookingCode = /*[[${booking.bookingCode}]]*/ '';
+    const isPending = /*[[${booking.status.name() == 'PENDING'}]]*/ false;
+
+    if (isPending && bookingCode) {
+        console.log("KHQR Real-time Polling active for booking:", bookingCode);
+        const pollInterval = setInterval(async () => {
+            try {
+                const response = await fetch('/api/payments/' + bookingCode + '/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.isPaid || data.paymentStatus === 'SUCCESS' || data.bookingStatus === 'PAID') {
+                        clearInterval(pollInterval);
+                        window.location.reload();
+                    }
+                }
+            } catch (err) {
+                console.warn("KHQR Polling check error:", err);
+            }
+        }, 3000);
+
+        // Stop polling after 15 minutes (timeout)
+        setTimeout(() => clearInterval(pollInterval), 15 * 60 * 1000);
+    }
+/*]]>*/
+</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top app-navbar">
+    <div class="container-fluid px-3 px-md-4 px-xl-5">
+        <a class="navbar-brand d-flex align-items-center me-3 me-xl-4 text-nowrap" th:href="@{/}">
+            <i class="bi bi-trophy-fill text-warning me-2 fs-4"></i>
+            <span>SportZone<span class="text-info">Arena</span></span>
+        </a>
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}" th:classappend="${activeMenu == 'home'} ? 'active' : ''">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/categories}" th:classappend="${activeMenu == 'categories'} ? 'active' : ''">
+                        <i class="bi bi-grid"></i>
+                        <span>Sports Categories</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/fields}" th:classappend="${activeMenu == 'fields'} ? 'active' : ''">
+                        <i class="bi bi-flag"></i>
+                        <span>All Fields</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/about}" th:classappend="${activeMenu == 'about'} ? 'active' : ''">
+                        <i class="bi bi-info-circle"></i>
+                        <span>About Us</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/contact}" th:classappend="${activeMenu == 'contact'} ? 'active' : ''">
+                        <i class="bi bi-envelope"></i>
+                        <span>Contact Us</span>
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-2 mt-2 mt-lg-0">
+                <!-- If Not Authenticated -->
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="btn btn-outline-light btn-sm px-3 text-nowrap" th:href="@{/login}">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAnonymous()">
+                    <a class="btn btn-info btn-sm px-3 text-white text-nowrap" th:href="@{/register}">
+                        <i class="bi bi-person-plus me-1"></i>Register
+                    </a>
+                </li>
+
+                <!-- If Authenticated Admin Quick Portal Link -->
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="btn btn-admin-portal btn-sm px-3 py-1.5 text-nowrap d-inline-flex align-items-center shadow-sm" th:href="@{/admin}">
+                        <i class="bi bi-shield-lock-fill me-1.5"></i><span>Admin Dashboard</span>
+                    </a>
+                </li>
+
+                <!-- If Authenticated -->
+                <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle nav-user-btn d-flex align-items-center text-nowrap" href="#" id="userMenu"
+                       role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-5 me-1.5 text-info"></i>
+                        <span sec:authentication="name" class="fw-medium text-truncate" style="max-width: 150px;">User</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenu">
+                        <li sec:authorize="hasRole('ADMIN')">
+                            <a class="dropdown-item text-danger fw-bold" th:href="@{/admin}">
+                                <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
+                            </a>
+                        </li>
+                        <li sec:authorize="hasRole('ADMIN')"><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/my-bookings}">
+                                <i class="bi bi-calendar-check me-2 text-primary"></i>My Bookings
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/profile}">
+                                <i class="bi bi-person-badge me-2 text-secondary"></i>My Profile
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="d-inline w-100">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

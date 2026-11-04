@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title th:text="${category.name} + ' Fields - SportZone Arena'">Category Fields</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Breadcrumb & Header -->
+    <div class="p-4 p-md-5 rounded-4 mb-5 text-white position-relative overflow-hidden shadow-sm"
+         style="background: linear-gradient(135deg, #0b7285 0%, #084c5a 100%);">
+        <div class="position-relative" style="z-index: 2;">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-white-50 text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/categories}" class="text-white-50 text-decoration-none">Categories</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page" th:text="${category.name}">Category</li>
+                </ol>
+            </nav>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3">
+                <div>
+                    <h1 class="fw-bold mb-2 display-6" th:text="${category.name} + ' Venues & Courts'">Category Fields</h1>
+                    <p class="text-white-50 mb-0 lead fs-6" style="max-width: 650px;" th:text="${category.description}">
+                        Browse verified venues, select your preferred date, and book time slots in seconds.
+                    </p>
+                </div>
+                <a th:href="@{/fields(categoryId=${category.id})}" class="btn btn-outline-light rounded-pill px-4 btn-sm">
+                    <i class="bi bi-funnel me-1"></i>Filter In All Fields
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fields in Category -->
+    <div th:if="${fields == null or fields.isEmpty()}" class="text-center py-5 bg-white rounded-4 shadow-sm my-4">
+        <div class="display-1 text-muted opacity-50 mb-3"><i class="bi bi-inbox"></i></div>
+        <h4 class="fw-bold text-dark">No fields available right now</h4>
+        <p class="text-muted">There are currently no active fields listed under this category.</p>
+        <a th:href="@{/fields}" class="btn btn-primary rounded-pill px-4 mt-2">
+            <i class="bi bi-arrow-left me-1"></i>Explore All Other Fields
+        </a>
+    </div>
+
+    <div th:unless="${fields == null or fields.isEmpty()}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+        <div class="col" th:each="field : ${fields}">
+            <div class="card sport-card h-100 border-0 shadow-sm d-flex flex-column">
+                <!-- Field Image -->
+                <div class="position-relative overflow-hidden" style="height: 220px; background-color: #e9ecef;">
+                    <img th:if="${field.mainImagePath != null}" th:src="@{${field.mainImagePath}}"
+                         class="card-img-top h-100 object-fit-cover" th:alt="${field.name}">
+                    <div th:unless="${field.mainImagePath != null}"
+                         class="h-100 d-flex align-items-center justify-content-center text-muted">
+                        <i class="bi bi-image fs-1"></i>
+                    </div>
+                    <span class="position-absolute top-0 end-0 m-3 badge bg-dark bg-opacity-75 rounded-pill py-2 px-3 fw-normal"
+                          th:text="${field.category.name}">Category</span>
+                    <span th:if="${field.peakPrice != null}"
+                          class="position-absolute bottom-0 start-0 m-3 badge bg-warning text-dark rounded-pill py-1 px-3 fw-semibold shadow-sm">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>Peak Available
+                    </span>
+                </div>
+
+                <!-- Field Info -->
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="card-title fw-bold text-dark mb-2" th:text="${field.name}">Field Name</h5>
+                    <p class="card-text text-muted small text-truncate-2 mb-3" th:text="${field.description}">Description</p>
+
+                    <!-- Details Pill Rows -->
+                    <div class="d-flex flex-wrap gap-2 mb-3 small text-muted">
+                        <span class="badge bg-light text-secondary border px-2 py-1">
+                            <i class="bi bi-clock me-1 text-primary"></i>
+                            <span th:text="${#temporals.format(field.openTime, 'HH:mm')} + ' - ' + ${#temporals.format(field.closeTime, 'HH:mm')}">Hours</span>
+                        </span>
+                        <span class="badge bg-light text-secondary border px-2 py-1">
+                            <i class="bi bi-hourglass-split me-1 text-primary"></i>
+                            <span th:text="${field.slotMinutes} + ' min/slot'">Duration</span>
+                        </span>
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Price per slot</small>
+                            <span class="fw-bold text-primary fs-5" th:text="'$' + ${field.pricePerSlot}">$0.00</span>
+                        </div>
+                        <a th:href="@{'/fields/' + ${field.id}}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
+                            <i class="bi bi-calendar-check me-1"></i>Book Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

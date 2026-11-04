@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title>Home - SportZone Arena</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <!-- Hero Section -->
+    <div class="hero-section mb-5 shadow">
+        <div class="hero-backdrop-glow"></div>
+        <div class="row align-items-center g-4 position-relative" style="z-index: 2;">
+            <!-- Left Column: Content & CTAs -->
+            <div class="col-lg-7 text-center text-lg-start">
+                <div class="hero-badge">
+                    <i class="bi bi-lightning-charge-fill text-warning"></i>
+                    <span>Fast & Easy Field Booking</span>
+                </div>
+                <h1 class="hero-title">
+                    Find & Book Your <br class="d-none d-sm-inline" />
+                    <span class="hero-highlight">Favorite Sport Field</span>
+                </h1>
+                <p class="hero-desc mb-4">
+                    Instant real-time slot booking for Football, Futsal, Badminton, Tennis, Basketball, and Volleyball with seamless Bakong KHQR payments.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3 mb-4">
+                    <a th:href="@{/categories}" class="btn hero-btn-primary btn-lg px-4 fw-bold shadow-sm">
+                        <i class="bi bi-grid-fill me-2"></i>Browse Categories
+                    </a>
+                    <a th:href="@{/fields}" class="btn hero-btn-outline btn-lg px-4">
+                        <i class="bi bi-search me-2"></i>Explore Fields
+                    </a>
+                </div>
+                <!-- Trust & Feature Perks -->
+                <div class="hero-perks justify-content-center justify-content-lg-start">
+                    <div class="hero-perk-item">
+                        <i class="bi bi-patch-check-fill text-warning"></i>
+                        <span>Instant Confirmation</span>
+                    </div>
+                    <div class="hero-perk-item">
+                        <i class="bi bi-qr-code-scan text-warning"></i>
+                        <span>Bakong KHQR</span>
+                    </div>
+                    <div class="hero-perk-item">
+                        <i class="bi bi-shield-lock-fill text-warning"></i>
+                        <span>100% Verified Venues</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Visual Showcase -->
+            <div class="col-lg-5">
+                <div class="hero-image-card">
+                    <span class="hero-float-badge top-badge">
+                        <i class="bi bi-stars text-warning"></i>
+                        <span>Top Rated Venues</span>
+                    </span>
+                    <img th:src="@{/img/hero-sports-field.jpg}"
+                         alt="Sport Fields Arena"
+                         class="img-fluid"
+                         loading="eager" />
+                    <span class="hero-float-badge bottom-badge">
+                        <i class="bi bi-clock-history text-info"></i>
+                        <span>Real-Time Availability</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sports Categories -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Sport Categories</h3>
+                <p class="text-muted mb-0">Choose your favorite sport category to view available fields</p>
+            </div>
+            <a th:href="@{/categories}" class="btn btn-outline-primary btn-sm">View All <i class="bi bi-arrow-right"></i></a>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 g-xl-4">
+            <div class="col" th:each="cat : ${categories}">
+                <a th:href="@{'/categories/' + ${cat.id}}" class="text-decoration-none">
+                    <div class="category-card h-100 text-center">
+                        <div class="category-avatar-wrapper">
+                            <img th:if="${cat.image != null and !cat.image.isEmpty()}"
+                                 th:src="@{${cat.image}}"
+                                 th:alt="${cat.name}"
+                                 class="category-avatar-img"
+                                 loading="lazy" />
+                            <div th:unless="${cat.image != null and !cat.image.isEmpty()}"
+                                 class="category-avatar-fallback">
+                                <i class="bi bi-trophy-fill"></i>
+                            </div>
+                        </div>
+                        <h6 class="category-title text-truncate" th:text="${cat.name}">Category</h6>
+                        <div>
+                            <span class="category-badge"
+                                  th:text="${cat.fields != null ? cat.fields.size() + ' Fields' : 'Explore'}">Fields</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Fields -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Featured Fields</h3>
+                <p class="text-muted mb-0">Book popular sports fields with top-rated facilities</p>
+            </div>
+            <a th:href="@{/fields}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                View All <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="col" th:each="field : ${featuredFields}">
+                <div class="card sport-card h-100">
+                    <div class="position-relative bg-secondary-subtle overflow-hidden" style="height: 210px;">
+                        <img th:if="${field.mainImagePath != null}" th:src="@{${field.mainImagePath}}"
+                             class="card-img-top h-100 object-fit-cover" alt="Field Image">
+                        <div th:unless="${field.mainImagePath != null}"
+                             class="h-100 d-flex align-items-center justify-content-center text-muted">
+                            <i class="bi bi-image fs-1"></i>
+                        </div>
+                        <span class="position-absolute top-0 end-0 m-3 badge bg-dark bg-opacity-75 rounded-pill py-2 px-3 fw-normal"
+                              th:text="${field.category.name}">Category</span>
+                    </div>
+                    <div class="card-body d-flex flex-column p-4">
+                        <h5 class="card-title fw-bold text-dark mb-2" th:text="${field.name}">Field Name</h5>
+                        <p class="card-text text-muted small text-truncate mb-3" th:text="${field.description}">Description</p>
+                        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted d-block" style="font-size: 0.75rem;">Price per slot</small>
+                                <span class="fw-bold text-primary fs-5" th:text="'$' + ${field.pricePerSlot}">$0.00</span>
+                            </div>
+                            <a th:href="@{'/fields/' + ${field.id}}" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                                <i class="bi bi-calendar-plus me-1"></i>Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQs Section -->
+    <section id="faq" class="faq-section mb-5">
+        <!-- Section Header -->
+        <div class="text-center mb-4">
+            <div class="faq-header-badge">
+                <i class="bi bi-question-circle-fill text-warning"></i>
+                <span>Frequently Asked Questions</span>
+            </div>
+            <h2 class="faq-title">Got Questions? We've Got You Covered.</h2>
+            <p class="faq-subtitle">
+                Everything you need to know about booking sports fields in Phnom Penh, instant Bakong KHQR payments, cancellations, and venue amenities.
+            </p>
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="faq-filter-container" id="faqFilterPills">
+            <button type="button" class="faq-filter-btn active" data-filter="all" id="faqFilterAll">
+                <i class="bi bi-grid-fill"></i>
+                <span>All Questions</span>
+                <span class="faq-filter-badge" id="badgeAll">8</span>
+            </button>
+            <button type="button" class="faq-filter-btn" data-filter="booking" id="faqFilterBooking">
+                <i class="bi bi-calendar-check-fill"></i>
+                <span>Booking & Slots</span>
+                <span class="faq-filter-badge">2</span>
+            </button>
+            <button type="button" class="faq-filter-btn" data-filter="payment" id="faqFilterPayment">
+                <i class="bi bi-qr-code-scan"></i>
+                <span>Bakong KHQR</span>
+                <span class="faq-filter-badge">1</span>
+            </button>
+            <button type="button" class="faq-filter-btn" data-filter="cancellation" id="faqFilterCancellation">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                <span>Cancellations & Rain</span>
+                <span class="faq-filter-badge">2</span>
+            </button>
+            <button type="button" class="faq-filter-btn" data-filter="venue" id="faqFilterVenue">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>Venues & Equipment</span>
+                <span class="faq-filter-badge">3</span>
+            </button>
+        </div>
+
+        <!-- Live Search Input -->
+        <div class="faq-search-wrapper">
+            <i class="bi bi-search faq-search-icon"></i>
+            <input type="text"
+                   id="faqSearchInput"
+                   class="faq-search-input"
+                   placeholder="Search questions (e.g. Bakong, cancel, rain, hours, balls)..."
+                   autocomplete="off"
+                   aria-label="Search frequently asked questions">
+            <button type="button"
+                    id="faqSearchClear"
+                    class="faq-search-clear"
+                    title="Clear search"
+                    aria-label="Clear search input">
+                <i class="bi bi-x-circle-fill"></i>
+            </button>
+        </div>
+
+        <!-- Meta Controls (Count & Toggle All) -->
+        <div class="faq-meta-bar">
+            <span class="faq-count-text" id="faqResultCount">Showing all 8 questions</span>
+            <button type="button" class="faq-toggle-all-btn" id="faqToggleAllBtn">
+                <i class="bi bi-arrows-expand"></i>
+                <span id="faqToggleAllText">Expand All</span>
+            </button>
+        </div>
+
+        <!-- Accordion Cards Container -->
+        <div class="faq-accordion" id="faqAccordionContainer">
+
+            <!-- FAQ 1: Booking Process -->
+            <div class="faq-card" data-category="booking">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse1"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse1"
+                        id="faqBtn1">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-calendar2-check-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                How do I book a pitch or court on SportZone Arena?
+                                <span class="faq-tag-badge">Booking</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse1"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn1">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            Booking a sports pitch takes less than 60 seconds with our seamless real-time platform:
+                        </p>
+                        <ol class="ps-3 mb-3">
+                            <li class="mb-1"><strong>Select a sport:</strong> Browse categories (Football, Futsal, Badminton, Tennis, Basketball, or Volleyball).</li>
+                            <li class="mb-1"><strong>Pick a field & date:</strong> Choose your preferred venue and view live available hourly time slots.</li>
+                            <li class="mb-1"><strong>Confirm details:</strong> Select an open slot, enter your player details, and tap <em>Book Now</em>.</li>
+                            <li class="mb-1"><strong>Pay with Bakong KHQR:</strong> Scan the instant KHQR code using any Cambodian bank app.</li>
+                        </ol>
+                        <div class="faq-feature-box">
+                            <i class="bi bi-patch-check-fill text-success me-1"></i>
+                            <strong>Instant Confirmation:</strong> Your booking is instantly confirmed in our live database, preventing any double-booking. Your digital pass and booking details are accessible anytime under <em>My Bookings</em>.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 2: Bakong KHQR Payment -->
+            <div class="faq-card" data-category="payment">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse2"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse2"
+                        id="faqBtn2">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-qr-code-scan"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                How does payment with Bakong KHQR work? Are there any extra fees?
+                                <span class="faq-tag-badge">Payment</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse2"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn2">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            SportZone Arena is powered by the National Bank of Cambodia's official <strong>Bakong KHQR</strong> standard:
+                        </p>
+                        <ul class="ps-3 mb-3">
+                            <li class="mb-1"><strong>Universal Bank Compatibility:</strong> Scan the generated QR code using <em>ABA Mobile, Wing Bank, ACLEDA mobile, Canadia Bank, Sathapana, TrueMoney, or the official Bakong app</em>.</li>
+                            <li class="mb-1"><strong>Zero Extra Fees:</strong> There are 0% hidden fees or transaction surcharges. You pay exactly the listed field rental price.</li>
+                            <li class="mb-1"><strong>Automated Verification:</strong> No need to take screenshots or manually upload bank receipts. Our system verifies transaction settlement automatically in real-time.</li>
+                        </ul>
+                        <div class="faq-feature-box">
+                            <i class="bi bi-shield-check text-primary me-1"></i>
+                            <strong>100% Encrypted & Safe:</strong> All transactions are settled directly through Cambodia's secure interbank clearing network.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 3: Cancellation & Rescheduling -->
+            <div class="faq-card" data-category="cancellation">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse3"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse3"
+                        id="faqBtn3">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                Can I cancel or reschedule my reserved booking?
+                                <span class="faq-tag-badge">Cancellation</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse3"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn3">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            We understand team schedules can change. Here is our flexible policy:
+                        </p>
+                        <ul class="ps-3 mb-3">
+                            <li class="mb-1"><strong>Up to 12 Hours in Advance:</strong> You can cancel or request a date/time reschedule directly from your <em>My Bookings</em> profile without penalty.</li>
+                            <li class="mb-1"><strong>Reschedule Vouchers:</strong> You will receive a venue booking credit or date-change confirmation for an alternative available time slot.</li>
+                            <li class="mb-1"><strong>Late Notice (< 12 hours):</strong> For last-minute changes, please contact our Phnom Penh support hotline immediately so we can coordinate directly with the pitch master.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 4: Rain & Weather Policy -->
+            <div class="faq-card" data-category="cancellation">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse4"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse4"
+                        id="faqBtn4">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-cloud-rain-heavy-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                What is the policy if it rains heavily on an outdoor field?
+                                <span class="faq-tag-badge">Weather</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse4"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn4">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            Cambodian tropical showers happen, and player safety always comes first:
+                        </p>
+                        <ul class="ps-3 mb-2">
+                            <li class="mb-1"><strong>Outdoor Pitches (Football & Open Tennis):</strong> If extreme downpours, waterlogging, or thunderstorm conditions render the pitch unplayable, the venue manager will issue a free <em>Weather Reschedule Credit</em> valid for 30 days.</li>
+                            <li class="mb-1"><strong>Indoor Venues (Futsal, Badminton, Basketball):</strong> All indoor venues are fully sheltered, temperature-controlled, and operate normally rain or shine.</li>
+                        </ul>
+                        <div class="faq-feature-box">
+                            <i class="bi bi-info-circle-fill text-info me-1"></i>
+                            <strong>Tip:</strong> You can check weather forecasts on match day, or call the venue manager listed on your booking ticket for real-time turf status.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 5: Balls & Gear Rental -->
+            <div class="faq-card" data-category="venue">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse5"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse5"
+                        id="faqBtn5">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-dribbble"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                Are match balls, team bibs, and sports gear provided?
+                                <span class="faq-tag-badge">Amenities</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse5"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn5">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            Yes! Each verified venue in our network offers high-quality facilities and amenities:
+                        </p>
+                        <ul class="ps-3 mb-2">
+                            <li class="mb-1"><strong>Football & Futsal:</strong> Official match balls and sets of colored team bibs (pinnies) are provided complimentary upon check-in.</li>
+                            <li class="mb-1"><strong>Racket Sports:</strong> Tennis rackets, badminton rackets, and tubes of shuttlecocks/balls can be rented or purchased at the venue pro-shop.</li>
+                            <li class="mb-1"><strong>Facilities:</strong> Modern changing rooms, clean showers, lockers, drinking water dispensers, and free parking for motorbikes and cars are available on-site.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 6: Arrival & Check-in -->
+            <div class="faq-card" data-category="venue">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse6"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse6"
+                        id="faqBtn6">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                How early should our team arrive before our scheduled slot?
+                                <span class="faq-tag-badge">Check-in</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse6"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn6">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            We advise teams to arrive <strong>10 to 15 minutes</strong> before their booked slot begins.
+                        </p>
+                        <p class="mb-2">
+                            This ensures enough time to present your digital booking confirmation on your smartphone at the front desk, lace up your footwear, warm up in the side zone, and step onto the court right at kickoff so you enjoy every minute of your allotted time.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 7: Corporate & League Bookings -->
+            <div class="faq-card" data-category="booking">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse7"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse7"
+                        id="faqBtn7">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                Can I book recurring slots for corporate leagues or weekly team practices?
+                                <span class="faq-tag-badge">Corporate</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse7"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn7">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            Absolutely! SportZone Arena frequently partners with corporate companies, private schools, and sports clubs across Phnom Penh:
+                        </p>
+                        <ul class="ps-3 mb-2">
+                            <li class="mb-1"><strong>Weekly Fixed Slots:</strong> Lock in your team's favorite day and hour (e.g., every Wednesday 7:00 PM – 9:00 PM) for months in advance.</li>
+                            <li class="mb-1"><strong>Tournament Management:</strong> We can assist with multi-field reservations, referee arrangements, tournament brackets, and branded event signage.</li>
+                            <li class="mb-1"><strong>Corporate Billing:</strong> Monthly unified VAT-compliant invoicing and dedicated corporate discounts are available.</li>
+                        </ul>
+                        <div class="faq-feature-box">
+                            <i class="bi bi-envelope-check-fill text-warning me-1"></i>
+                            Reach out via our <a th:href="@{/contact}" class="fw-bold text-decoration-underline text-dark">Contact Form</a> or call our hotline to discuss custom league packages.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ 8: Locations & Coverage -->
+            <div class="faq-card" data-category="venue">
+                <button class="faq-button"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faqCollapse8"
+                        aria-expanded="false"
+                        aria-controls="faqCollapse8"
+                        id="faqBtn8">
+                    <div class="faq-question-wrap">
+                        <div class="faq-icon-pill">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <h3 class="faq-question-text">
+                                Where are SportZone Arena partner venues located across Phnom Penh?
+                                <span class="faq-tag-badge">Locations</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="faq-chevron-pill">
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                </button>
+                <div id="faqCollapse8"
+                     class="accordion-collapse collapse faq-collapse"
+                     aria-labelledby="faqBtn8">
+                    <div class="faq-body">
+                        <p class="mb-2">
+                            We currently feature premier partner sports complexes in key districts of Phnom Penh:
+                        </p>
+                        <div class="row row-cols-1 row-cols-sm-2 g-2 mb-3">
+                            <div class="col">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <strong class="text-dark d-block"><i class="bi bi-pin-map-fill text-danger me-1"></i>Sen Sok & Toul Kork</strong>
+                                    <small class="text-muted">7-a-side & 11-a-side grass/turf pitches, indoor futsal</small>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <strong class="text-dark d-block"><i class="bi bi-pin-map-fill text-danger me-1"></i>BKK & Chamkarmon</strong>
+                                    <small class="text-muted">Air-conditioned badminton courts & tennis clubs</small>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <strong class="text-dark d-block"><i class="bi bi-pin-map-fill text-danger me-1"></i>Chroy Changvar</strong>
+                                    <small class="text-muted">Riverside multi-sport stadiums & outdoor courts</small>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="p-2 border rounded-3 bg-light">
+                                    <strong class="text-dark d-block"><i class="bi bi-pin-map-fill text-danger me-1"></i>Meanchey & Boeung Tumpun</strong>
+                                    <small class="text-muted">Basketball & volleyball hardwood arenas</small>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mb-0 text-muted small">
+                            Full addresses, telephone contacts, and direct Google Maps pins are available on each field detail page.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Empty State (When search has 0 matches) -->
+        <div class="faq-empty-state" id="faqEmptyState">
+            <div class="faq-empty-icon">
+                <i class="bi bi-search"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-2">No Matching Questions Found</h5>
+            <p class="text-muted mb-3" id="faqEmptyQueryText">
+                We couldn't find any questions matching your search keywords.
+            </p>
+            <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="faqResetBtn">
+                <i class="bi bi-arrow-clockwise me-1"></i>Reset Search & Filters
+            </button>
+        </div>
+
+        <!-- Still Have Questions CTA Banner -->
+        <div class="faq-support-card">
+            <div class="faq-support-glow"></div>
+            <div class="row align-items-center g-4 position-relative" style="z-index: 2;">
+                <div class="col-lg-7 text-center text-lg-start">
+                    <span class="badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold mb-2">
+                        <i class="bi bi-headset me-1"></i>24/7 Dedicated Support
+                    </span>
+                    <h3 class="faq-support-title">Still have questions or need custom arrangements?</h3>
+                    <p class="faq-support-desc mb-0">
+                        Our Phnom Penh operations team is available daily from <strong>06:00 AM to 11:00 PM</strong> to assist with field reservations, Bakong KHQR verification, corporate tournaments, and venue partnerships.
+                    </p>
+                </div>
+                <div class="col-lg-5">
+                    <div class="d-flex flex-wrap justify-content-center justify-content-lg-end gap-2">
+                        <a th:href="@{/contact}" class="faq-contact-btn shadow-sm">
+                            <i class="bi bi-chat-dots-fill"></i>Contact Us
+                        </a>
+                        <a href="https://t.me" target="_blank" class="faq-telegram-btn">
+                            <i class="bi bi-telegram"></i>Telegram
+                        </a>
+                        <a href="tel:+85523998777" class="faq-hotline-badge">
+                            <i class="bi bi-telephone-fill text-warning"></i>+855 (0)23 998 777
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('faqSearchInput');
+    const searchClear = document.getElementById('faqSearchClear');
+    const filterBtns = document.querySelectorAll('.faq-filter-btn');
+    const faqCards = document.querySelectorAll('.faq-card');
+    const countDisplay = document.getElementById('faqResultCount');
+    const emptyState = document.getElementById('faqEmptyState');
+    const emptyQueryText = document.getElementById('faqEmptyQueryText');
+    const resetBtn = document.getElementById('faqResetBtn');
+    const toggleAllBtn = document.getElementById('faqToggleAllBtn');
+    const toggleAllText = document.getElementById('faqToggleAllText');
+
+    let currentFilter = 'all';
+    let searchQuery = '';
+    let areAllExpanded = false;
+
+    // Track Bootstrap collapse events to toggle .is-open class
+    document.querySelectorAll('.faq-collapse').forEach(function (collapseEl) {
+        collapseEl.addEventListener('show.bs.collapse', function () {
+            const card = this.closest('.faq-card');
+            if (card) card.classList.add('is-open');
+        });
+        collapseEl.addEventListener('hide.bs.collapse', function () {
+            const card = this.closest('.faq-card');
+            if (card) card.classList.remove('is-open');
+        });
+    });
+
+    // Update visibility based on filter and search query
+    function filterFAQs() {
+        let visibleCount = 0;
+        const normalizedQuery = searchQuery.trim().toLowerCase();
+
+        faqCards.forEach(function (card) {
+            const category = card.getAttribute('data-category');
+            const matchesCategory = (currentFilter === 'all' || category === currentFilter);
+
+            let matchesSearch = true;
+            if (normalizedQuery.length > 0) {
+                const questionText = card.querySelector('.faq-question-text')?.textContent.toLowerCase() || '';
+                const bodyText = card.querySelector('.faq-body')?.textContent.toLowerCase() || '';
+                matchesSearch = questionText.includes(normalizedQuery) || bodyText.includes(normalizedQuery);
+            }
+
+            if (matchesCategory && matchesSearch) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Update count display
+        if (searchQuery.trim().length > 0 || currentFilter !== 'all') {
+            countDisplay.textContent = `Showing ${visibleCount} of ${faqCards.length} questions`;
+        } else {
+            countDisplay.textContent = `Showing all ${faqCards.length} questions`;
+        }
+
+        // Handle empty state
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+            if (searchQuery.trim().length > 0) {
+                emptyQueryText.textContent = `We couldn't find any questions matching "${searchQuery.trim()}". Try different keywords or reset your filters.`;
+            } else {
+                emptyQueryText.textContent = `No questions found in this category.`;
+            }
+        } else {
+            emptyState.style.display = 'none';
+        }
+
+        // Toggle clear button
+        if (searchClear) {
+            searchClear.style.display = searchQuery.trim().length > 0 ? 'block' : 'none';
+        }
+    }
+
+    // Category button click handler
+    filterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.getAttribute('data-filter') || 'all';
+            filterFAQs();
+        });
+    });
+
+    // Search input handler
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            searchQuery = this.value;
+            filterFAQs();
+        });
+    }
+
+    // Clear search handler
+    if (searchClear) {
+        searchClear.addEventListener('click', function () {
+            searchInput.value = '';
+            searchQuery = '';
+            searchInput.focus();
+            filterFAQs();
+        });
+    }
+
+    // Reset filters handler
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function () {
+            if (searchInput) searchInput.value = '';
+            searchQuery = '';
+            currentFilter = 'all';
+            filterBtns.forEach(b => {
+                if (b.getAttribute('data-filter') === 'all') {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+            filterFAQs();
+        });
+    }
+
+    // Expand All / Collapse All handler
+    if (toggleAllBtn) {
+        toggleAllBtn.addEventListener('click', function () {
+            areAllExpanded = !areAllExpanded;
+            const visibleCards = Array.from(faqCards).filter(c => c.style.display !== 'none');
+
+            visibleCards.forEach(function (card) {
+                const collapseEl = card.querySelector('.faq-collapse');
+                if (!collapseEl) return;
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
+                if (areAllExpanded) {
+                    bsCollapse.show();
+                } else {
+                    bsCollapse.hide();
+                }
+            });
+
+            if (areAllExpanded) {
+                toggleAllBtn.innerHTML = '<i class="bi bi-arrows-collapse"></i><span>Collapse All</span>';
+            } else {
+                toggleAllBtn.innerHTML = '<i class="bi bi-arrows-expand"></i><span>Expand All</span>';
+            }
+        });
+    }
+
+    // Smooth scroll if URL has #faq
+    if (window.location.hash === '#faq') {
+        setTimeout(function () {
+            const faqSection = document.getElementById('faq');
+            if (faqSection) {
+                faqSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 200);
+    }
+});
+</script>
+</th:block>
+</body>
+</html>

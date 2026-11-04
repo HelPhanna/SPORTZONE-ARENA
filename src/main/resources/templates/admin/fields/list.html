@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Sports Fields Management</title>
+</head>
+<body>
+<div layout:fragment="page-title">Sports Fields</div>
+
+<div layout:fragment="content">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-flag-fill text-success me-2"></i>Sports Facilities & Pitches
+            </h3>
+            <p class="text-muted mb-0">Configure sports fields, pricing, slot schedules, and operational availability.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a th:href="@{/admin/fields/create}" class="btn btn-primary rounded-pill px-3 shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="bi bi-plus-circle-fill"></i>
+                <span class="fw-semibold">Add Sports Field</span>
+            </a>
+            <a th:href="@{/fields}" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Preview Customer View
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="admin-card mb-4">
+        <div class="admin-card-body p-3">
+            <form th:action="@{/admin/fields}" method="get" class="row g-2 align-items-end">
+                <div class="col-12 col-md-5">
+                    <label class="form-label small text-muted mb-1">Search Field Name</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="keyword" th:value="${keyword}" class="form-control border-start-0" placeholder="e.g. Arena, Futsal, Court...">
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small text-muted mb-1">Sport Category</label>
+                    <select name="categoryId" class="form-select form-select-sm">
+                        <option value="">All Categories</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
+                                th:selected="${cat.id == selectedCategoryId}"></option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small text-muted mb-1">Status</label>
+                    <select name="status" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option th:each="st : ${statuses}" th:value="${st}" th:text="${st.name()}"
+                                th:selected="${st == selectedStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1 rounded-3">
+                        <i class="bi bi-funnel-fill"></i> Filter
+                    </button>
+                    <a th:href="@{/admin/fields}" class="btn btn-outline-secondary btn-sm rounded-3" title="Reset Filters">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fields Table Card -->
+    <div class="admin-card">
+        <div class="admin-card-header d-flex justify-content-between align-items-center">
+            <h5 class="admin-card-title mb-0">
+                <i class="bi bi-grid-3x3-gap-fill text-primary"></i>
+                <span>All Facilities</span>
+            </h5>
+            <span class="badge bg-light text-dark border" th:text="${fieldsPage.totalElements} + ' total fields'">0 total fields</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table admin-table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Field Name</th>
+                        <th>Category</th>
+                        <th>Price / Slot</th>
+                        <th>Peak Price</th>
+                        <th>Slot Duration</th>
+                        <th>Hours</th>
+                        <th>Status</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${fieldsPage.content.isEmpty()}">
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-flag fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <h6 class="fw-bold">No fields found</h6>
+                            <p class="small mb-3">Adjust your search keyword or create a new sports field.</p>
+                            <a th:href="@{/admin/fields/create}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                <i class="bi bi-plus-circle me-1"></i> Add Sports Field
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:each="field : ${fieldsPage.content}">
+                        <td>
+                            <div class="fw-bold text-dark" th:text="${field.name}">National Arena Field A</div>
+                            <small class="text-muted text-truncate d-inline-block" style="max-width: 260px;" th:text="${field.description}">Description</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" th:text="${field.category.name}">Category</span>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-dark" th:text="'$' + ${#numbers.formatDecimal(field.pricePerSlot, 1, 'COMMA', 2, 'POINT')}">$35.00</span>
+                        </td>
+                        <td>
+                            <span th:if="${field.peakPrice != null}" class="text-warning-emphasis fw-semibold" th:text="'$' + ${#numbers.formatDecimal(field.peakPrice, 1, 'COMMA', 2, 'POINT')}">$45.00</span>
+                            <span th:unless="${field.peakPrice != null}" class="text-muted">-</span>
+                        </td>
+                        <td>
+                            <span th:text="${field.slotMinutes} + ' mins'">60 mins</span>
+                        </td>
+                        <td>
+                            <small class="text-muted" th:text="${#temporals.format(field.openTime, 'HH:mm')} + ' - ' + ${#temporals.format(field.closeTime, 'HH:mm')}">06:00 - 23:00</small>
+                        </td>
+                        <td>
+                            <span th:if="${field.status.name() == 'ACTIVE'}" class="badge-status badge-status-active">
+                                <i class="bi bi-check-circle-fill"></i> Active
+                            </span>
+                            <span th:unless="${field.status.name() == 'ACTIVE'}" class="badge-status badge-status-inactive">
+                                <i class="bi bi-tools"></i> Inactive
+                            </span>
+                        </td>
+                        <td class="text-end pe-3">
+                            <div class="d-inline-flex align-items-center gap-1">
+                                <!-- Edit Button -->
+                                <a th:href="@{'/admin/fields/' + ${field.id} + '/edit'}" class="btn btn-sm btn-outline-secondary rounded-circle p-1" style="width: 32px; height: 32px;" title="Edit Field">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <!-- Status Toggle Button -->
+                                <form th:action="@{'/admin/fields/' + ${field.id} + '/toggle-status'}" method="post" class="m-0 p-0">
+                                    <button type="submit" class="btn btn-sm rounded-circle p-1" style="width: 32px; height: 32px;"
+                                            th:classappend="${field.status.name() == 'ACTIVE'} ? 'btn-outline-warning' : 'btn-outline-success'"
+                                            th:title="${field.status.name() == 'ACTIVE'} ? 'Disable Field' : 'Activate Field'">
+                                        <i class="bi" th:classappend="${field.status.name() == 'ACTIVE'} ? 'bi-pause-circle' : 'bi-play-circle'"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Delete Button -->
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 32px; height: 32px;"
+                                        th:data-field-id="${field.id}"
+                                        th:data-field-name="${field.name}"
+                                        onclick="openDeleteFieldModal(this)" title="Delete Field">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${fieldsPage.totalPages > 1}" class="p-3 border-top d-flex justify-content-between align-items-center">
+            <span class="text-muted small">
+                Showing page <strong th:text="${fieldsPage.number + 1}">1</strong> of <strong th:text="${fieldsPage.totalPages}">1</strong>
+            </span>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${fieldsPage.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/fields(page=${fieldsPage.number - 1}, keyword=${keyword}, categoryId=${selectedCategoryId}, status=${selectedStatus})}">Previous</a>
+                </li>
+                <li class="page-item" th:classappend="${fieldsPage.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin/fields(page=${fieldsPage.number + 1}, keyword=${keyword}, categoryId=${selectedCategoryId}, status=${selectedStatus})}">Next</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteFieldModal" tabindex="-1" aria-labelledby="deleteFieldModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-danger" id="deleteFieldModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Sports Field
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="deleteFieldForm" method="post" action="">
+                    <div class="modal-body py-4">
+                        <p class="mb-2">Are you sure you want to permanently delete facility <strong id="deleteFieldNameText" class="text-dark">Field Name</strong>?</p>
+                        <div class="alert alert-warning small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Fields with active or upcoming reservations cannot be deleted until those bookings are completed or cancelled.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill px-4">
+                            <i class="bi bi-trash me-1"></i>Delete Permanently
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+    function openDeleteFieldModal(btn) {
+        const fieldId = btn.getAttribute('data-field-id');
+        const fieldName = btn.getAttribute('data-field-name');
+
+        document.getElementById('deleteFieldNameText').innerText = fieldName;
+        document.getElementById('deleteFieldForm').action = '/admin/fields/' + fieldId + '/delete';
+
+        const modal = new bootstrap.Modal(document.getElementById('deleteFieldModal'));
+        modal.show();
+    }
+</script>
+</th:block>
+</body>
+</html>

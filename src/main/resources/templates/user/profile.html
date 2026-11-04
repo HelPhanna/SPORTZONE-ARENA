@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/user-layout}">
+<head>
+    <title>My Profile - SportZone Arena</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header Banner -->
+    <div class="p-4 p-md-5 rounded-4 mb-4 text-white position-relative overflow-hidden shadow-sm"
+         style="background: linear-gradient(135deg, #0b7285 0%, #084c5a 100%);">
+        <div class="position-relative" style="z-index: 2;">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a th:href="@{/}" class="text-white-50 text-decoration-none"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">Profile</li>
+                </ol>
+            </nav>
+            <h1 class="fw-bold mb-2 display-6">Account & Profile Settings</h1>
+            <p class="text-white-50 mb-0 lead fs-6">
+                Manage your contact details, security credentials, and reservation preferences.
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Left Column: User Summary Card -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+                <div class="position-relative d-inline-block mx-auto mb-3">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm"
+                         style="width: 100px; height: 100px; font-size: 2.5rem; font-weight: bold;">
+                        <span th:text="${#strings.substring(user.name, 0, 1)}">U</span>
+                    </div>
+                </div>
+                <h4 class="fw-bold text-dark mb-1" th:text="${user.name}">User Name</h4>
+                <p class="text-muted small mb-3" th:text="${user.email}">user@example.com</p>
+                <div class="d-flex justify-content-center gap-2 mb-4">
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold"
+                          th:text="'Role: ' + ${user.role.name()}">Role</span>
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-patch-check-fill me-1"></i>Active
+                    </span>
+                </div>
+
+                <div class="p-3 bg-light rounded-4 text-start border">
+                    <div class="d-flex justify-content-between mb-2 small">
+                        <span class="text-muted"><i class="bi bi-calendar3 me-1"></i>Member Since:</span>
+                        <strong th:text="${#temporals.format(user.createdAt, 'MMM yyyy')}">Date</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-0 small">
+                        <span class="text-muted"><i class="bi bi-ticket-perforated me-1"></i>Active Bookings:</span>
+                        <strong class="text-primary" th:text="${activeBookingsCount}">0</strong>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top">
+                    <a th:href="@{/my-bookings}" class="btn btn-outline-primary w-100 rounded-pill">
+                        <i class="bi bi-calendar-check me-1"></i>View My Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Settings Tabs -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+                <ul class="nav nav-tabs border-bottom mb-4" id="profileTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-semibold" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">
+                            <i class="bi bi-person me-1"></i>Personal Information
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-semibold" id="password-tab" data-bs-toggle="tab" data-bs-target="#password" type="button" role="tab">
+                            <i class="bi bi-shield-lock me-1"></i>Change Password
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="profileTabContent">
+                    <!-- Tab 1: Personal Info Form -->
+                    <div class="tab-pane fade show active" id="details" role="tabpanel">
+                        <form th:action="@{/profile/update}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted">Full Name</label>
+                                <input type="text" name="name" class="form-control form-control-lg bg-light"
+                                       th:value="${user.name}" required minlength="2">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted">Email Address (Read-only)</label>
+                                <input type="email" class="form-control form-control-lg bg-light opacity-75"
+                                       th:value="${user.email}" readonly>
+                                <small class="text-muted">Email is used for account login and cannot be altered directly.</small>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small text-muted">Phone Number (Bakong KHQR SMS)</label>
+                                <input type="text" name="phone" class="form-control form-control-lg bg-light"
+                                       th:value="${user.phone}" placeholder="+855 12 345 678">
+                            </div>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                                <i class="bi bi-check-lg me-1"></i>Save Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tab 2: Change Password Form -->
+                    <div class="tab-pane fade" id="password" role="tabpanel">
+                        <form th:action="@{/profile/change-password}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted">Current Password</label>
+                                <input type="password" name="currentPassword" class="form-control form-control-lg bg-light" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted">New Password</label>
+                                <input type="password" name="newPassword" class="form-control form-control-lg bg-light" required minlength="6">
+                                <small class="text-muted">Password must be at least 6 characters long.</small>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold small text-muted">Confirm New Password</label>
+                                <input type="password" name="confirmPassword" class="form-control form-control-lg bg-light" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                                <i class="bi bi-key me-1"></i>Update Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

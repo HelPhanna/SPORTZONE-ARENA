@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Create User Account</title>
+</head>
+<body>
+<div layout:fragment="page-title">Add User</div>
+
+<div layout:fragment="content">
+    <div class="mb-4">
+        <a th:href="@{/admin/users}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 mb-2">
+            <i class="bi bi-arrow-left me-1"></i> Back to Accounts
+        </a>
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-person-plus text-primary me-2"></i>Create User / Administrator Account
+        </h3>
+        <p class="text-muted mb-0">Register a new player customer or facility administrative staff account.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h5 class="admin-card-title">
+                        <i class="bi bi-person-vcard text-primary"></i>
+                        <span>Account Credentials & Profile</span>
+                    </h5>
+                </div>
+                <div class="admin-card-body p-4">
+                    <form th:action="@{/admin/users/create}" method="post">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control" placeholder="e.g. Michael Jordan" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Email Address <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="e.g. michael@example.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Phone Number</label>
+                                <input type="text" name="phone" class="form-control" placeholder="e.g. +855 12 345 678">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Initial Password <span class="text-danger">*</span></label>
+                                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Account Role <span class="text-danger">*</span></label>
+                                <select name="role" class="form-select">
+                                    <option value="USER" selected>USER - Customer Player</option>
+                                    <option value="ADMIN">ADMIN - System Administrator</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-dark">Account Status <span class="text-danger">*</span></label>
+                                <select name="status" class="form-select">
+                                    <option value="ACTIVE" selected>ACTIVE - Normal Access</option>
+                                    <option value="BLOCKED">BLOCKED - Access Suspended</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a th:href="@{/admin/users}" class="btn btn-outline-secondary rounded-pill px-4">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i> Create Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
